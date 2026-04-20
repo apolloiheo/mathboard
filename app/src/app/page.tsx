@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ArrowRight, Sigma, FileText, Users, Sparkles } from "lucide-react"
+import Link from "next/link"
 
 export default function HomePage() {
   return (
@@ -40,10 +41,12 @@ export default function HomePage() {
         </p>
 
         <div className="mt-8 flex justify-center gap-3">
-          <Button size="lg">
-            Get started
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+          <Link href="/signin">
+            <Button size="lg">
+              Get started
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
           <Button variant="outline" size="lg">
             View demo
           </Button>
