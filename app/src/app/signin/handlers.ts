@@ -1,4 +1,4 @@
-import { createUser, signinUser } from "@/services/api";
+import { createUser, signinUser } from "@/api/signin";
 
 export type CreateAccountResult =
   | { ok: true; token: string }

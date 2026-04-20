@@ -27,6 +27,10 @@ Frontend:
   - [ ] simple with call to action -> /signin redirects to /docs
   - [ ] Reformat to mimic modern polished look w/ empty image slots for previews
   - [ ] Take preview images (gifs?)
+- [x] /signin
+  - [x] create account card
+  - [x] signin card
+  - [x] uses url params to handle redirects after successful signin
 - [ ] /docs
   - [ ] placeholder simple list of id
 - [ ] /docs/d/{id}

@@ -13,7 +13,7 @@ export default function SignInPage() {
   const params = useSearchParams()
   const router = useRouter()
 
-  const redirectTo = params.get("redirect") || "/docs"
+  const redirectTo = params?.get("redirect") || "/docs"
 
   const handleRedirect = () => {
     router.push(redirectTo)
