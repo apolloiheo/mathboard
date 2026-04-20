@@ -3,6 +3,12 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 from db.base import Base
 from datetime import datetime
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from db.modules.docs.models import Document
+    from db.modules.docs.models import DocumentShare
+
 class User(Base):
     __tablename__ = "users"
 
@@ -17,6 +23,23 @@ class User(Base):
     # documents: Mapped[list["Document"]] = relationship(
     #     "Document", back_populates="owner"
     # )
+
+    owned_documents: Mapped[list["Document"]] = relationship(
+        "Document",
+        back_populates="owner"
+    )
+
+    shares: Mapped[list["DocumentShare"]] = relationship(
+        "DocumentShare",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
+    shared_documents: Mapped[list["Document"]] = relationship(
+        "Document",
+        secondary="document_shares",
+        back_populates="shared_with"
+    )
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

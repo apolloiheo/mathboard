@@ -23,3 +23,11 @@ class DocumentResponse(BaseModel):
 
     created_at: datetime
     updated_at: datetime
+
+class DocumentShareResponse(BaseModel):
+    doc_id: int
+    user_id: int
+    share_type: str
+    
+    created_at: datetime
+    updated_at: datetime

@@ -1,5 +1,7 @@
+from typing import Literal
+
 from db.core.auth.schemas import AuthUserCreate__Password
-from db.modules.docs.models import Document
+from db.modules.docs.models import Document, DocumentShare
 from db.modules.users.models import User
 from db.modules.users.schemas import UserCreate__AuthUser
 from fastapi import Depends
@@ -53,3 +55,64 @@ def delete_document(
     pass
     # TODO
 
+
+
+# ---- DocumentShare ----
+def create_documentshare(
+        doc_id: int,
+        user_id: int,
+        share_type: str,
+        db: Session
+):
+    """
+    share_type: read/write
+    """
+    share = DocumentShare(
+        doc_id=doc_id,
+        user_id=user_id,
+        permission=share_type
+    )
+    db.add(share)
+    db.commit()
+
+def get_documentshare_by_ids(
+        doc_id: int,
+        user_id: int,
+        db: Session
+):
+    return (
+        db.query(DocumentShare)
+        .filter(
+            DocumentShare.doc_id == doc_id,
+            DocumentShare.user_id == user_id
+        )
+        .first()
+    )
+    
+
+def update_documentshare(
+        doc_id: int,
+        user_id: int,
+        share_type: str,
+        db: Session
+) -> bool:
+    share = get_documentshare_by_ids(
+        doc_id=doc_id,
+        user_id=user_id,
+        db=db
+    )
+    if share is None:
+        return False
+    
+    return update_documentshare_with_share(share, share_type, db)
+
+def update_documentshare_with_share(
+        share: DocumentShare,
+        share_type: str,
+        db: Session
+):
+    share.permission = share_type
+    db.commit()
+    db.refresh(share)
+    return True
+    

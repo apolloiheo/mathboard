@@ -12,6 +12,7 @@ Backend:
 - [ ] docs
   - [x] db schema/model
   - [x] CRUD API for /doc
+  - [ ] ability to share docs
   - [ ] GET /docs
   - [ ] share edits via websockets
 

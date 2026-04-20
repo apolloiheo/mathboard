@@ -7,7 +7,7 @@ from db.core.auth.schemas import AuthUserUpdate__Password
 from db.core.auth.services import update_authuser__password
 from db.modules.docs.crud import get_docs_by_owner_id
 from db.modules.docs.schemas import DocumentResponse, DocumentUpdate
-from db.modules.docs.services import create_empty_untitled_doc, update_doc_text__check_permissions, delete_doc__check_permissions
+from db.modules.docs.services import create_empty_untitled_doc, try_create_or_update_documentshare, update_doc_text__check_permissions, delete_doc__check_permissions, try_get_documentshare
 from db.modules.users.crud import get_user_by_id
 from db.modules.users.schemas import UserPublicResponse, UserPrivateResponse
 from db.modules.users.services import get_current_user
@@ -82,3 +82,43 @@ def delete_doc(
     return {
         "success": success
     }
+
+
+# ---- DocumentShare ----
+class DocShareData(BaseModel):
+    doc_id: int
+    user_id: int
+    share_type: str
+
+@router.post("/doc-share", response_model=SuccessResponse)
+def share_doc(
+    data: DocShareData,
+    current_user: UserPrivateResponse = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):  
+    success = try_create_or_update_documentshare(
+        doc_id=data.doc_id,
+        user_id=data.user_id,
+        inviter_id=current_user.id,
+        share_type=data.share_type,
+        db=db
+    )
+    return {
+        "success": success
+    }
+
+class DocShareGetData(BaseModel):
+    doc_id: int
+
+@router.get("/doc-share", response_model=DocShareData | None)
+def get_docshare(
+    data: DocShareGetData,
+    current_user: UserPrivateResponse = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return try_get_documentshare(
+        doc_id=data.doc_id,
+        user_id=current_user.id,
+        db=db
+    )
+    
