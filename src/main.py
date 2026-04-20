@@ -18,9 +18,9 @@ app.add_middleware(
 )
 
 # -- Routers
-from .modules.test.routes import router as test_router
-from .db.modules.docs.routes import router as doc_router
-from .db.modules.users.routes import router as user_router
+from modules.test.routes import router as test_router
+from db.modules.docs.routes import router as doc_router
+from db.modules.users.routes import router as user_router
 
 for router in [
     test_router,

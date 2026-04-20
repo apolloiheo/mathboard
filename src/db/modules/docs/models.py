@@ -30,7 +30,7 @@ class Document(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    owner = relationship("User")
+    owner: Mapped["User"] = relationship("User")
 
     title: Mapped[str] = mapped_column(String, nullable=False, default="Untitled")
     text: Mapped[str] = mapped_column(String, nullable=False, default="")

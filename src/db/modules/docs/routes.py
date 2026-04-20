@@ -11,7 +11,7 @@ from db.modules.docs.services import create_empty_untitled_doc, try_create_or_up
 from db.modules.users.crud import get_user_by_id
 from db.modules.users.schemas import UserPublicResponse, UserPrivateResponse
 from db.modules.users.services import get_current_user
-from src.db.database import get_db
+from db.database import get_db
 
 router = APIRouter()
 

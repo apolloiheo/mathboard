@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
-from db.core.auth.models import AuthUser
+from db.core.auth.schemas import AuthUserResponse
 
 # ---------- Create ----------
 class UserCreate__AuthUser(BaseModel):
@@ -17,7 +17,7 @@ class UserPublicResponse(BaseModel):
 
 class UserPrivateResponse(UserPublicResponse):
     authuser_id: int
-    authuser: "AuthUser"
+    authuser: "AuthUserResponse"
 
     email: EmailStr
 

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
@@ -14,6 +16,16 @@ class AuthUserCreate__Password(BaseModel):
     email: EmailStr
     password: str
 
+class AuthUserResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+    google_id: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
 
 # ---------- Update ----------
 

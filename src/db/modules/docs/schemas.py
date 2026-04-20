@@ -5,7 +5,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from db.modules.users.models import User
+from db.modules.users.schemas import UserPublicResponse
 
 
 class DocumentUpdate(BaseModel):
@@ -16,7 +16,7 @@ class DocumentResponse(BaseModel):
     id: int
 
     owner_id: int
-    owner = User
+    owner: UserPublicResponse
 
     title: str
     text: str

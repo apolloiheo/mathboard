@@ -16,7 +16,7 @@ DATABASE_URL=
 ```cd app && npm i```
 
 ## Test
-`cd app && npm run dev`
+`cd app && PORT=12000 npm run dev`
 `cd src && python main.py`
 
 App: localhost:12000

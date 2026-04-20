@@ -9,7 +9,7 @@ from db.core.auth.services import update_authuser__password
 from db.modules.users.crud import get_user_by_id
 from db.modules.users.schemas import UserPublicResponse, UserPrivateResponse
 from db.modules.users.services import get_current_user
-from src.db.database import get_db
+from db.database import get_db
 
 router = APIRouter()
 
