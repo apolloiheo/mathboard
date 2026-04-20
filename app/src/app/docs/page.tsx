@@ -1,12 +1,16 @@
-// app/docs/page.tsx
+"use client"
+import { useAuth } from "@/hooks/useAuth";
 import { redirect } from "next/navigation";
+import { useEffect } from "react";
 
-export default async function DocsPage() {
-  const user = null; // replace with real auth
+export default function DocsPage() {
+  const { user, loading } = useAuth()
+    useEffect(() => {
+      if (!loading && !user) {
+        redirect("/signin?redirect=/docs");
+      }
+    }, [user, loading])
 
-  if (!user) {
-    redirect("/signin?redirect=/docs");
-  }
 
   return <div>Docs Dashboard</div>;
 }
