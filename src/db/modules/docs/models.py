@@ -3,16 +3,16 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 from db.base import Base
 from datetime import datetime
 
-class User(Base):
-    __tablename__ = "users"
+class Document(Base):
+    __tablename__ = "documents"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    authuser_id: Mapped[int] = mapped_column(ForeignKey("auth_users.id"))
-    authuser = relationship("AuthUser")
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    owner = relationship("User")
 
-    # username: Mapped[str] = mapped_column(ForeignKey("auth_users.username"))
-    # email: Mapped[str] = mapped_column(ForeignKey("auth_users.email"))
+    title: Mapped[str] = mapped_column(String, nullable=False, default="Untitled")
+    text: Mapped[str] = mapped_column(String, nullable=False, default="")
 
     # documents: Mapped[list["Document"]] = relationship(
     #     "Document", back_populates="owner"

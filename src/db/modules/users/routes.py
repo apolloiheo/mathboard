@@ -3,7 +3,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from db.core.auth.schemas import AuthUserUpdate__Password
+from db.core.auth.crud import create_user__password
+from db.core.auth.schemas import AuthUserCreate__Password, AuthUserUpdate__Password
 from db.core.auth.services import update_authuser__password
 from db.modules.users.crud import get_user_by_id
 from db.modules.users.schemas import UserPublicResponse, UserPrivateResponse
@@ -12,9 +13,16 @@ from src.db.database import get_db
 
 router = APIRouter()
 
-@router.get("/create-user")
-def create_user():
+@router.get("/ping")
+def ping():
     return {"message": "pong"}
+
+@router.post("/create-user")
+def create_user(
+        data: AuthUserCreate__Password,
+        db: Session = Depends(get_db),
+):
+    return create_user__password(data, db)
 
 class GetUserResponse(BaseModel):
     success: bool
@@ -48,6 +56,7 @@ class UpdatePasswordData(BaseModel):
     password: str
 class UpdatePasswordResponse(BaseModel):
     success: bool
+
 @router.post("/user-update-password", response_model=UpdatePasswordResponse)
 def update_password(
         data: UpdatePasswordData,

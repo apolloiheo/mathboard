@@ -13,6 +13,7 @@ Backend:
   - [ ] db schema/model
   - [ ] CRUD API for /doc
   - [ ] GET /docs
+  - [ ] share edits via websockets
 
 - [ ] /latex
   - [ ] simple inline render
@@ -35,6 +36,9 @@ Hosting:
 - [ ] Scalable infra
   - [ ] ...
 - [ ] 
+
+Safeguards:
+- [ ] Ensure document max-size exists and enforced to prevent abuse
 
 Test:
 - [ ] Go through decision-tree style all possible frontend/backend interactions to ensure every case has been accounted for
