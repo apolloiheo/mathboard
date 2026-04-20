@@ -15,15 +15,21 @@ from db.database import get_db
 
 router = APIRouter()
 
+class CreateDocData(BaseModel):
+    template: Optional[str] = "Blank Document"
+    title: Optional[str] = "New document"
+
 class CreateDocResponse(BaseModel):
     doc_id: int
 
-@router.get("/create-doc", response_model=CreateDocResponse)
+@router.post("/docs/new", response_model=CreateDocResponse)
 def create_doc(
+    data: CreateDocData,
     current_user: UserPrivateResponse = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     doc = create_empty_untitled_doc(current_user.id, db)
+    import pdb; pdb.set_trace()
     return {
         "doc_id": doc.id
     }

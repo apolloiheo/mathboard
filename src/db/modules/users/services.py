@@ -61,8 +61,6 @@ def login_user__password(
     user = get_user_by_username(data.username, db)
     if user is None:
         user = get_user_by_email(data.username, db)
-
-    import pdb; pdb.set_trace()
         
     if user is None:
         return
