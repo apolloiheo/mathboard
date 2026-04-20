@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from db.core.auth.schemas import AuthUserUpdate__Password
 from db.core.auth.services import update_authuser__password
+from db.modules.docs.schemas import DocumentUpdate
 from db.modules.docs.services import create_empty_untitled_doc, update_doc_text__check_permissions, delete_doc__check_permissions
 from db.modules.users.crud import get_user_by_id
 from db.modules.users.schemas import UserPublicResponse, UserPrivateResponse
@@ -32,14 +33,19 @@ class SuccessResponse(BaseModel):
 @router.post("/update-doc", response_model=SuccessResponse)
 def update_doc_text(
     doc_id: int,
-    text: str,
+    text: Optional[str|None]=None,
+    title: Optional[str|None]=None,
     current_user: UserPrivateResponse = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    update_data = DocumentUpdate.model_validate({
+        "text": text,
+        "title": title,
+    })
     success = update_doc_text__check_permissions(
         doc_id=doc_id,
         user_id=current_user.id,
-        text=text,
+        update_data=update_data,
         db=db
     )
     return {

@@ -23,12 +23,17 @@ def get_document_by_id(
 ):
     return db.query(Document).filter(Document.id == id).first()
 
-def update_document__text(
+def update_document__title_text(
         doc: Document,
-        text: str,
         db: Session,
+        title: str|None=None,
+        text: str|None=None,
 ):
-    doc.text = text
+    if title:
+        doc.title = title
+    if text:
+        doc.text = text
+
     db.commit()
     db.refresh(doc)
     return True

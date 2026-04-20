@@ -10,8 +10,8 @@ Backend:
   - [x] /me - token
 
 - [ ] docs
-  - [ ] db schema/model
-  - [ ] CRUD API for /doc
+  - [x] db schema/model
+  - [x] CRUD API for /doc
   - [ ] GET /docs
   - [ ] share edits via websockets
 

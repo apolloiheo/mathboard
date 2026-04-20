@@ -2,7 +2,8 @@
 
 from sqlalchemy.orm import Session
 
-from db.modules.docs.crud import create_document, get_document_by_id, update_document__text, delete_document
+from db.modules.docs.crud import create_document, get_document_by_id, update_document__title_text, delete_document
+from db.modules.docs.schemas import DocumentUpdate
 
 def create_empty_untitled_doc(
         owner_id: int,
@@ -13,7 +14,7 @@ def create_empty_untitled_doc(
 def update_doc_text__check_permissions(
         doc_id: int,
         user_id: int,
-        text: str,
+        update_data: DocumentUpdate,
         db: Session,
 ):
     """
@@ -30,7 +31,7 @@ def update_doc_text__check_permissions(
     if doc.owner_id != user_id:
         return False
     
-    update_document__text(doc, text, db)
+    update_document__title_text(doc, db, **update_data.model_dump())
     return True
     
 
