@@ -8,6 +8,12 @@ Link: hosted
 
 ## Features
 
+
+## In Progress
+- Export as PDF
+- Markdown support
+- Google Sign-In
+
 ## Technical
 ### Frontend
 /
@@ -30,7 +36,6 @@ DELETE /doc/?id={}
 Websockets
 ...
 
-## In Progress
-- Export as PDF
-- Markdown support
-- Google Sign-In
+
+### Low-Priority Enhancements
+- Add decorators to add another layer for function arguments to early return and for organization

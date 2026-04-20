@@ -10,6 +10,7 @@ pip install -r src/requirements.txt
 
 ### .env
 PROD=false/true
+SECRET_KEY=
 DATABASE_URL=
 
 ```cd app && npm i```
