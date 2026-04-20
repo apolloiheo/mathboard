@@ -17,6 +17,13 @@ def create_document(
     db.refresh(obj)
     return obj
 
+def get_docs_by_owner_id(
+        owner_id: int,
+        db: Session,
+        n: int=50,
+):
+    return db.query(Document).filter(Document.owner_id == owner_id).all()
+
 def get_document_by_id(
         id: int,
         db: Session,

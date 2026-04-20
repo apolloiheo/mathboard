@@ -1,10 +1,25 @@
 
 
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
+
+from db.modules.users.models import User
 
 
 class DocumentUpdate(BaseModel):
     text: Optional[str]
     title: Optional[str]
+
+class DocumentResponse(BaseModel):
+    id: int
+
+    owner_id: int
+    owner = User
+
+    title: str
+    text: str
+
+    created_at: datetime
+    updated_at: datetime

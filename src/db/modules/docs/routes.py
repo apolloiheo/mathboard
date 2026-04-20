@@ -5,7 +5,8 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from db.core.auth.schemas import AuthUserUpdate__Password
 from db.core.auth.services import update_authuser__password
-from db.modules.docs.schemas import DocumentUpdate
+from db.modules.docs.crud import get_docs_by_owner_id
+from db.modules.docs.schemas import DocumentResponse, DocumentUpdate
 from db.modules.docs.services import create_empty_untitled_doc, update_doc_text__check_permissions, delete_doc__check_permissions
 from db.modules.users.crud import get_user_by_id
 from db.modules.users.schemas import UserPublicResponse, UserPrivateResponse
@@ -26,6 +27,21 @@ def create_user(
     return {
         "doc_id": doc.id
     }
+
+class DocsData(BaseModel):
+    own: bool=True
+
+class DocsResponse(BaseModel):
+    docs: list[DocumentResponse]
+
+@router.get("/docs", response_model=DocsResponse)
+def get_docs(
+    data: DocsData,
+    current_user: UserPrivateResponse = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if data.own:
+        return get_docs_by_owner_id(current_user.id, db)
 
 class SuccessResponse(BaseModel):
     success: bool
