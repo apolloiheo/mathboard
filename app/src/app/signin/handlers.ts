@@ -1,4 +1,4 @@
-import { createUser } from "@/services/api";
+import { createUser, signinUser } from "@/services/api";
 
 export type CreateAccountResult =
   | { ok: true; token: string }
@@ -32,5 +32,25 @@ export async function createAccountHandler(data: {
 
     default:
       return { ok: false, error: "Unknown error" }
+  }
+}
+
+export type SigninResult = any;
+
+export async function signinHandler(data: {
+  username: string
+  password: string
+}): Promise<SigninResult> {
+  const res = await signinUser(data);
+
+  if (res?.token) {
+    return {
+      ok: true,
+      token: res.token
+    }
+  }
+
+  return {
+    ok: false
   }
 }

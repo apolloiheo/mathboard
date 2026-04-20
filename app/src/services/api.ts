@@ -25,3 +25,31 @@ export async function createUser(data: CreateUserInput): Promise<CreateUserRespo
 
   return res.json()
 }
+
+export type SigninUserInput = {
+    username: string
+    password: string
+}
+
+export type SigninUserResponse = {
+    user: any
+    token?: string
+}
+
+export async function signinUser(data: SigninUserInput): Promise<SigninUserResponse> {
+  const res = await fetch("http://localhost:12001/signin", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
+
+  console.log({res})
+
+  if (!res.ok) {
+    throw new Error("Network error")
+  }
+
+  return res.json()
+}

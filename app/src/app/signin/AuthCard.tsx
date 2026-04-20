@@ -4,13 +4,15 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { createAccountHandler } from "./handler"
+import { createAccountHandler, signinHandler } from "./handlers"
 import { useState } from "react"
 
 export const CreateAccount = ({
-    handleRedirect
+    handleRedirect,
+    setMode
 }: {
     handleRedirect: () => void
+    setMode: (arg0: Mode) => void
 }) => {
     const [username, setUsername] = useState("")
     const [email, setEmail] = useState("")
@@ -43,7 +45,7 @@ export const CreateAccount = ({
     return (
         <Card className="w-full max-w-md">
             <CardHeader className="text-center space-y-1">
-                <CardTitle className="text-2xl">Sign in to Mathboard</CardTitle>
+                <CardTitle className="text-2xl">Create account for Mathboard</CardTitle>
                 <p className="text-sm text-muted-foreground">
                     Continue to your LaTeX workspace
                 </p>
@@ -90,16 +92,56 @@ export const CreateAccount = ({
                 <div className="text-center text-xs text-muted-foreground">
                     No account? You’ll be able to sign up soon.
                 </div>
+
+                <div className="text-center text-xs text-muted-foreground space-y-2">
+                    <p>
+                        Already have an account?{" "}
+                        <button
+                            className="underline hover:text-foreground"
+                            onClick={() => setMode("signin")}
+                        >
+                            Sign in
+                        </button>
+                    </p>
+                </div>
             </CardContent>
         </Card>
     );
 }
 
 export const Signin = ({
-    handleRedirect
+    handleRedirect,
+    setMode
 }: {
     handleRedirect: () => void
+    setMode: (arg0: Mode) => void
 }) => {
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
+
+    const [error, setError] = useState<string | null>(null)
+    const [loading, setLoading] = useState(false)
+
+    async function handleSignin() {
+        setLoading(true)
+        setError(null)
+
+        const result = await signinHandler({
+            username,
+            password,
+        })
+
+        setLoading(false)
+
+        if (!result.ok) {
+            setError(result.error)
+            return
+        }
+
+        localStorage.setItem("token", result.token)
+        handleRedirect()
+    }
+
     return (
         <Card className="w-full max-w-md">
             <CardHeader className="text-center space-y-1">
@@ -111,28 +153,66 @@ export const Signin = ({
 
             <CardContent className="space-y-4">
                 <div className="space-y-2">
-                    <Label>Username</Label>
-                    <Input />
-                </div>
-
-                <div className="space-y-2">
-                    <Label>Email</Label>
-                    <Input placeholder="you@example.com" />
+                    <Label>Username/email</Label>
+                    <Input
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                    />
                 </div>
 
                 <div className="space-y-2">
                     <Label>Password</Label>
-                    <Input type="password" placeholder="••••••••" />
+                    <Input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                    />
                 </div>
 
-                <Button className="w-full py-4" onClick={handleRedirect}>
+                {error && (
+                    <div className="text-sm text-red-500">
+                        {error}
+                    </div>
+                )}
+
+                <Button className="w-full py-4" onClick={handleSignin}>
                     Sign in
                 </Button>
 
                 <div className="text-center text-xs text-muted-foreground">
                     No account? You’ll be able to sign up soon.
                 </div>
+
+                <div className="text-center text-xs text-muted-foreground space-y-2">
+                    <p>
+                        No account?{" "}
+                        <button
+                            className="underline hover:text-foreground"
+                            onClick={() => setMode("signup")}
+                        >
+                            Create one
+                        </button>
+                    </p>
+
+                </div>
             </CardContent>
         </Card>
     );
+}
+
+type Mode = "signin" | "signup"
+
+export const AuthCard = ({
+    handleRedirect,
+    paramMode = "signin"
+}: {
+    handleRedirect: () => void
+    paramMode?: Mode
+}) => {
+    const [mode, setMode] = useState<Mode>(paramMode)
+
+    return mode === "signup"
+        ? <CreateAccount handleRedirect={handleRedirect} setMode={setMode} />
+        : <Signin handleRedirect={handleRedirect} setMode={setMode} />
 }
