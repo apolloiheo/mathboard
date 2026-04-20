@@ -9,10 +9,11 @@ from db.core.auth.utils.password import hash_password, verify_password
 from db.core.auth.utils.token import create_access_token
 from db.database import get_db
 from db.core.auth.models import AuthUser
-from db.core.auth.schemas import AuthUserCreate, AuthUserCreate__Password, AuthUserLogin__UsernamePassword, AuthUserUpdate, AuthUserUpdate__Email, AuthUserUpdate__Password, AuthUserUpdate__PasswordHash
+from db.core.auth.schemas import AuthUserCreate, AuthUserCreate__Password, AuthUserCreate__PasswordHash, AuthUserLogin__UsernamePassword, AuthUserUpdate, AuthUserUpdate__Email, AuthUserUpdate__Password, AuthUserUpdate__PasswordHash
 from fastapi import Depends, HTTPException, Header, status
 
 from db.core.auth.utils.token import verify_access_token
+from db.modules.users.utils.validate import validate_email
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -41,6 +42,14 @@ def create_authuser(
       - 30 = invalid password
       - 90 = account already exists (email duplicate from google_id?)
     """
+    # validate email to EmailStr
+    try:
+        validate_email(data.email)
+    except HTTPException:
+        return {
+            "code": 20
+        }
+    
     # Check if a user already exists by username/email
     if get_authuser_by_username(data.username, db):
         return {
@@ -58,10 +67,10 @@ def create_authuser(
         }
 
     # Create user
-    user = create_user__password(AuthUserCreate__Password.model_validate({
+    user = create_user__password(AuthUserCreate__PasswordHash.model_validate({
         "username": data.username,
         "email": data.email,
-        "password": hash_password(data.password)
+        "password_hash": hash_password(data.password)
     }), db)
 
     access_token = create_access_token(user.id)

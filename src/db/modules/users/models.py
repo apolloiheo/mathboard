@@ -38,7 +38,7 @@ class User(Base):
     shared_documents: Mapped[list["Document"]] = relationship(
         "Document",
         secondary="document_shares",
-        back_populates="shared_with"
+        viewonly=True
     )
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

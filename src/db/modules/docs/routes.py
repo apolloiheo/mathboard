@@ -19,7 +19,7 @@ class CreateDocResponse(BaseModel):
     doc_id: int
 
 @router.get("/create-doc", response_model=CreateDocResponse)
-def create_user(
+def create_doc(
     current_user: UserPrivateResponse = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):

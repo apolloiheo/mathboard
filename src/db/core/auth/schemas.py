@@ -7,14 +7,19 @@ from typing import Optional
 
 class AuthUserCreate(BaseModel):
     username: Optional[str] = None          # may be auto-generated for OAuth
-    email: EmailStr
+    email: str
     password: Optional[str] = None          # only for password-based accounts
     google_id: Optional[str] = None         # only for Google OAuth
 
 class AuthUserCreate__Password(BaseModel):
     username: str
-    email: EmailStr
+    email: str
     password: str
+
+class AuthUserCreate__PasswordHash(BaseModel):
+    username: str
+    email: str
+    password_hash: str
 
 class AuthUserResponse(BaseModel):
     id: int

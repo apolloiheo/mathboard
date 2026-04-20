@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Literal, Optional
+
+from pydantic import BaseModel
 
 from db.core.auth.schemas import AuthUserResponse
 
@@ -7,21 +8,22 @@ from db.core.auth.schemas import AuthUserResponse
 class UserCreate__AuthUser(BaseModel):
     authuser_id: int
     username: str
-    email: EmailStr
-
+    email: str
 
 # ---------- Get ----------
 class UserPublicResponse(BaseModel):
     id: int
-    username: str
 
 class UserPrivateResponse(UserPublicResponse):
     authuser_id: int
     authuser: "AuthUserResponse"
 
-    email: EmailStr
+    # email: str
 
     # ....
+
+    class Config:
+        from_attributes = True
 
 # ---------- Update ----------
 class UserUpdate__Username(BaseModel):
@@ -36,4 +38,14 @@ class UserUpdate__Password(BaseModel):
     id: int
     username: str
 
+# ---------- Signin -----------
+class UserSignin(BaseModel):
+    username: str # can be email
+    password: str
 
+class UserSigninResponse(BaseModel):
+    user: UserPrivateResponse | None
+    token: Optional[str] = None
+
+    class Config:
+        from_attributes = True

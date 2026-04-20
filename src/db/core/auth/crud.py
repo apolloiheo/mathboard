@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
-from .schemas import AuthUserCreate__Password, AuthUserUpdate__Username, AuthUserUpdate__Email, AuthUserUpdate__PasswordHash
+from .schemas import AuthUserCreate__PasswordHash, AuthUserUpdate__Username, AuthUserUpdate__Email, AuthUserUpdate__PasswordHash
 from .models import AuthUser
 
-def create_user__password(data: AuthUserCreate__Password, db: Session) -> AuthUser:
+def create_user__password(data: AuthUserCreate__PasswordHash, db: Session) -> AuthUser:
     obj = AuthUser(**data.model_dump())
     db.add(obj)
     db.commit()

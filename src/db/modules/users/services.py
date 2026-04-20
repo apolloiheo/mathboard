@@ -1,17 +1,16 @@
 
 
-
 from db.core.auth.schemas import AuthUserCreate__Password
 from db.core.auth.services import create_authuser
+from db.core.auth.utils.password import hash_password, verify_password
 from db.core.auth.utils.token import verify_access_token
 from db.database import get_db
 from fastapi import Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 
-from db.modules.users.crud import create_user__authuser
+from db.modules.users.crud import create_user__authuser, get_user_by_email, get_user_by_username
 from db.modules.users.models import User
-from db.modules.users.schemas import UserCreate__AuthUser, UserPrivateResponse, UserPublicResponse
-
+from db.modules.users.schemas import UserCreate__AuthUser, UserPrivateResponse, UserPublicResponse, UserSignin
 
 def create_user__password(
         data: AuthUserCreate__Password,
@@ -37,12 +36,13 @@ def create_user__password(
       - 30 = invalid password
       - 90 = account already exists (email duplicate from google_id?)
     """
+    print({**data.model_dump()})
     authuser_create_dict = create_authuser(data, db)
     if authuser_create_dict["code"] == 100:
         authuser_arg = UserCreate__AuthUser.model_validate({
             "authuser_id": authuser_create_dict["user"].id,
-            "username": authuser_create_dict["username"],
-            "email": authuser_create_dict["email"],
+            "username": authuser_create_dict["user"].username,
+            "email": authuser_create_dict["user"].email,
         })
         return {
             "code": 100,
@@ -53,6 +53,21 @@ def create_user__password(
         return {
             "code": authuser_create_dict["code"]
         }
+    
+def login_user__password(
+        data: UserSignin,
+        db: Session
+) -> User | None:
+    user = get_user_by_username(data.username, db)
+    if user is None:
+        user = get_user_by_email(data.username, db)
+    
+    if user is None:
+        return
+    elif verify_password(data.password, user.authuser.password_hash):
+        return user
+    else:
+        return
     
 def get_user_public(db: Session, user_id: int) -> UserPublicResponse:
     user = db.query(User).get(user_id)
