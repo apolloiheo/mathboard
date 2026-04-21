@@ -1,7 +1,146 @@
-// app/docs/d/[id]/page.tsx
-import { redirect } from "next/navigation";
+"use client"
 
-export default function EditorPage({ params }) {
+import { useEffect, useState } from "react"
+import { useParams, useRouter } from "next/navigation"
+import { TextEditor } from "./TextEditor"
+import { Button } from "@/components/ui/button"
+import { updateTitle } from "@/hooks/autoSaveDoc"
 
-  return <div>Editor</div>;
+type Document = {
+  id: number
+  title: string
+  text: string
+}
+
+export default function DocPage() {
+  const router = useRouter()
+  const params = useParams()
+  const id = params.id as string
+
+  const [doc, setDoc] = useState<Document | null>(null)
+  const [loading, setLoading] = useState(true)
+
+
+  const [title, setTitle] = useState("Untitled Document")
+  useEffect(() => {
+    if (!doc) {
+      return
+    }
+    setTitle(doc.title)
+  }, [doc])
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value);
+    updateTitle(id, e.target.value);
+  };
+
+  useEffect(() => {
+    async function loadDoc() {
+      const token = localStorage.getItem("token")
+
+      if (!token) {
+        router.replace("/signin")
+        return
+      }
+
+      try {
+        const res = await fetch(`http://localhost:12001/docs/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (!res.ok) throw new Error("Failed to load doc")
+
+        const data = await res.json()
+        setDoc(data)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadDoc()
+  }, [id, router])
+
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center text-sm text-muted-foreground">
+        Loading document...
+      </div>
+    )
+  }
+
+  if (!doc) {
+    return (
+      <div className="h-screen flex items-center justify-center text-sm text-red-500">
+        Document not found
+      </div>
+    )
+  }
+
+  return (
+    <div className="h-screen w-full flex flex-col bg-white">
+
+      {/* TOP BAR */}
+      <div className="flex items-center justify-between border-b px-4 py-2">
+
+        {/* Left side */}
+        <div className="flex items-center gap-3">
+          <Button
+            className="text-sm"
+            onClick={() => router.push("/docs")}
+          >
+            ← Back
+          </Button>
+
+          <input
+            value={title}
+            onChange={handleTitleChange}
+            className="text-sm font-medium outline-none bg-transparent border-b border-transparent focus:border-muted"
+          />
+
+          <div className="text-xs text-muted-foreground">
+            Last saved: just now
+          </div>
+        </div>
+
+        {/* Right side */}
+        <div className="flex items-center gap-2">
+          <Button
+            className="text-sm"
+          >
+            Export
+          </Button>
+
+          <Button
+            className="text-sm"
+          >
+            Share
+          </Button>
+        </div>
+      </div>
+
+      {/* TOOLBAR (future formatting controls) */}
+      <div className="flex items-center gap-2 border-b px-4 py-2 bg-muted/20">
+        <div className="w-8 h-8 bg-muted rounded" />
+        <div className="w-8 h-8 bg-muted rounded" />
+        <div className="w-8 h-8 bg-muted rounded" />
+        <div className="w-8 h-8 bg-muted rounded" />
+        <div className="w-8 h-8 bg-muted rounded" />
+
+        {/* spacer */}
+        <div className="flex-1" />
+
+        <div className="text-xs text-muted-foreground">
+          formatting tools
+        </div>
+      </div>
+
+      {/* EDITOR AREA */}
+      <TextEditor docId={id} />
+
+    </div>
+  )
 }

@@ -56,7 +56,7 @@ export default function DocsPage() {
             {docs.map((doc) => (
               <div
                 key={doc.id}
-                onClick={() => router.push(`/docs/${doc.id}`)}
+                onClick={() => router.push(`/docs/d/${doc.id}`)}
                 className="p-2 rounded hover:bg-muted cursor-pointer"
               >
                 <div className="text-sm font-medium truncate">

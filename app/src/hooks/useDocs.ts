@@ -5,8 +5,13 @@ import { useRouter } from "next/navigation"
 
 export type Document = {
   id: number
+  owner_id: number
+  owner: any
+
   title: string
   text: string
+
+  created_at: string
   updated_at: string
 }
 
@@ -26,7 +31,7 @@ export function useDocuments() {
       }
 
       try {
-        const res = await fetch("http://127.0.0.1:12001/docs", {
+        const res = await fetch("http://127.0.0.1:12001/my-docs?own=true", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -36,8 +41,8 @@ export function useDocuments() {
           throw new Error("Failed to fetch documents")
         }
 
-        const data: Document[] = await res.json()
-        setDocs(data)
+        const data = await res.json()
+        setDocs(data["docs"] as Document[])
       } catch (err) {
       } finally {
         setLoading(false)

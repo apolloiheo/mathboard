@@ -162,3 +162,15 @@ def try_get_documentshare(
     assert share is not None # from user_can_read_document()
 
     return DocumentShareResponse.model_validate(**share.model_dump())
+
+
+# ---- Document interaction ----
+def view_document(
+        doc_id: int,
+        user_id: int,
+        db: Session
+):
+    if not user_can_read_document(doc_id, user_id, db):
+        return None
+    
+    return get_document_by_id(doc_id, db)

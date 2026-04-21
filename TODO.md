@@ -16,7 +16,14 @@ Backend:
   - [ ] GET /docs
   - [ ] share edits via websockets
 
-- [ ] /latex
+- [ ] doc
+  - [ ] supports regular markdown
+    - [ ] bold/italicize/underline
+    - [ ] headers
+    - [ ] ` code blocks
+    - [ ] ``` code blocks
+
+- [ ] latex
   - [ ] simple inline render
   - [ ] simple multiline render
   - [ ] caching for doc?
