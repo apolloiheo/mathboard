@@ -2,7 +2,8 @@
 
 import { DocumentResponsePermission } from "@/api/docs"
 import { useAutoSaveDocument } from "@/hooks/autoSaveDoc"
-import { ChangeEventHandler, useEffect, useState } from "react"
+import { ChangeEventHandler, useEffect, useRef, useState } from "react"
+import { applyOp } from "./ot"
 
 type Props = {
     doc: DocumentResponsePermission
@@ -16,6 +17,7 @@ export function TextEditor({
     initialValue = ""
 }: Props) {
     const [value, setValue] = useState(initialValue)
+    const prevValueRef = useRef(initialValue)
     const [ws, setWs] = useState<WebSocket | null>(null)
 
     useEffect(() => {
@@ -24,11 +26,13 @@ export function TextEditor({
         setWs(socket)
 
         socket.onmessage = (event) => {
-            const data = JSON.parse(event.data)
+            const op = JSON.parse(event.data)
 
-            if (data.type === "edit" && data.content !== value) {
-                setValue(data.content)
-            }
+            setValue((prev) => {
+                const newVal = applyOp(prev, op)
+                prevValueRef.current = newVal
+                return newVal
+            })
         }
 
         return () => {
@@ -36,16 +40,56 @@ export function TextEditor({
         }
     }, [])
 
+
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newValue = e.target.value
-        setValue(newValue)
+        const oldValue = prevValueRef.current
 
-        ws?.send(
-            JSON.stringify({
-            type: "edit",
-            content: newValue,
-            })
-        )
+        // find first diff
+        let start = 0
+        while (
+            start < oldValue.length &&
+            start < newValue.length &&
+            oldValue[start] === newValue[start]
+        ) {
+            start++
+        }
+
+        // find end diff
+        let oldEnd = oldValue.length - 1
+        let newEnd = newValue.length - 1
+
+        while (
+            oldEnd >= start &&
+            newEnd >= start &&
+            oldValue[oldEnd] === newValue[newEnd]
+        ) {
+            oldEnd--
+            newEnd--
+        }
+
+        let op
+
+        if (newValue.length > oldValue.length) {
+            // INSERT
+            op = {
+                type: "insert",
+                pos: start,
+                text: newValue.slice(start, newEnd + 1),
+            }
+        } else {
+            // DELETE
+            op = {
+                type: "delete",
+                pos: start,
+                length: oldEnd - start + 1,
+            }
+        }
+
+        setValue(newValue)
+        prevValueRef.current = newValue
+
+        ws?.send(JSON.stringify(op))
     }
 
     return (

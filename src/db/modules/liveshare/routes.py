@@ -3,9 +3,11 @@ from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
 from db.database import get_db
+from db.modules.docs.crud import get_document_by_id
 from db.modules.docs.schemas import DocumentUpdate
 from db.modules.docs.services import update_doc_text__check_permissions, user_can_write_document
 from db.modules.liveshare.connection_manager import ConnectionManager
+from db.modules.liveshare.op import apply_op
 from db.modules.users.schemas import UserPrivateResponse
 from db.modules.users.services import get_current_user_ws
 
@@ -21,7 +23,7 @@ async def websocket_endpoint(
     db: Session = Depends(get_db),
     current_user_id: int|None = Depends(get_current_user_ws),
 ):
-    await manager.connect(websocket, doc_id)
+    await manager.connect(websocket, doc_id, db)
 
     try:
         while True:
@@ -30,16 +32,17 @@ async def websocket_endpoint(
 
             # broadcast to ALL other users
             if current_user_id and user_can_write_document(doc_id, current_user_id, db):
-                await manager.broadcast(doc_id, data)
+                await manager.broadcast(doc_id, data, websocket)
 
-                update_doc_text__check_permissions(
-                    doc_id,
-                    current_user_id,
-                    DocumentUpdate.model_validate({"text": data["content"]}),
-                    db
-                )
-
-                
+                # update_doc_text__check_permissions(
+                #     doc_id,
+                #     current_user_id,
+                #     DocumentUpdate.model_validate({"text": data["content"]}),
+                #     db
+                # )
 
     except WebSocketDisconnect:
         manager.disconnect(websocket, doc_id)
+
+    finally:
+        pass
