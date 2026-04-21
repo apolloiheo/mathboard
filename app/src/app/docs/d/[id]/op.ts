@@ -1,6 +1,7 @@
 type Op =
   | { type: "insert"; pos: number; text: string }
   | { type: "delete"; pos: number; length: number }
+  | { type: "init"; content: string; }
 
 export const applyOp = (val: string, op: any) => {
   if (op.type === "insert") {

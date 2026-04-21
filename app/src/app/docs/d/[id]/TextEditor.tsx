@@ -3,7 +3,7 @@
 import { DocumentResponsePermission } from "@/api/docs"
 import { useAutoSaveDocument } from "@/hooks/autoSaveDoc"
 import { ChangeEventHandler, useEffect, useRef, useState } from "react"
-import { applyOp } from "./ot"
+import { applyOp } from "./op"
 
 type Props = {
     doc: DocumentResponsePermission
@@ -16,6 +16,7 @@ export function TextEditor({
     user,
     initialValue = ""
 }: Props) {
+    const [ready, setReady] = useState(false)
     const [value, setValue] = useState(initialValue)
     const prevValueRef = useRef(initialValue)
     const [ws, setWs] = useState<WebSocket | null>(null)
@@ -26,13 +27,19 @@ export function TextEditor({
         setWs(socket)
 
         socket.onmessage = (event) => {
-            const op = JSON.parse(event.data)
-
-            setValue((prev) => {
-                const newVal = applyOp(prev, op)
-                prevValueRef.current = newVal
-                return newVal
-            })
+            const data = JSON.parse(event.data)
+            if (data.type === "insert" || data.type == "delete") {
+                setValue((prev) => {
+                    const newVal = applyOp(prev, data)
+                    prevValueRef.current = newVal
+                    return newVal
+                })
+            }
+            if (data.type == "init") {
+                setValue(data.content)
+                prevValueRef.current = data.content
+                setReady(true)
+            }
         }
 
         return () => {

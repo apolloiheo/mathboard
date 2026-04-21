@@ -37,21 +37,11 @@ class ConnectionManager:
             self.debounce_save(doc_id)
         )
 
-        # max-interval save
-        last = self.last_save_time.get(doc_id, 0)
-        now = time.time()
-
-        if now - last > self.MAX_INTERVAL_SAVE:
-            db2 = SessionLocal()
-            try:
-                doc = get_document_by_id(doc_id, db2)
-                if doc is None:
-                    return
-                doc.text = self.doc_contents[doc_id]
-                db2.commit()
-                self.last_save_time[doc_id] = now
-            finally:
-                db2.close()
+        # send cached initial state
+        await websocket.send_json({
+            "type": "init",
+            "content": self.doc_contents[doc_id]
+        })
 
     def disconnect(self, websocket: WebSocket, doc_id: int):
         self.active_connections[doc_id].remove(websocket)
@@ -64,10 +54,17 @@ class ConnectionManager:
                 await conn.send_json(message)
         self.doc_contents[doc_id] = apply_op(self.doc_contents[doc_id], message)
 
-    # - util
+        # max-interval save
+        last = self.last_save_time.get(doc_id, 0)
+        if time.time() - last > self.MAX_INTERVAL_SAVE:
+            self.force_save(doc_id)
+
+    # - save
     async def debounce_save(self, doc_id: int, sec: int=2):
         await asyncio.sleep(sec)
+        self.force_save(doc_id)
 
+    def force_save(self, doc_id: int):
         db = SessionLocal()
         try:
             doc = get_document_by_id(doc_id, db)
@@ -75,5 +72,7 @@ class ConnectionManager:
                 return
             doc.text = self.doc_contents[doc_id]
             db.commit()
+            self.last_save_time[doc_id] = time.time()
         finally:
             db.close()
+
