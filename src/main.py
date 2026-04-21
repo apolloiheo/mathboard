@@ -21,11 +21,13 @@ app.add_middleware(
 from modules.test.routes import router as test_router
 from db.modules.docs.routes import router as doc_router
 from db.modules.users.routes import router as user_router
+from db.modules.liveshare.routes import router as liveshare_router
 
 for router in [
     test_router,
     doc_router,
     user_router,
+    liveshare_router
 ]:
     app.include_router(router)
 

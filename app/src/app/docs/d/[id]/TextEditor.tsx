@@ -2,7 +2,7 @@
 
 import { DocumentResponsePermission } from "@/api/docs"
 import { useAutoSaveDocument } from "@/hooks/autoSaveDoc"
-import { useEffect, useState } from "react"
+import { ChangeEventHandler, useEffect, useState } from "react"
 
 type Props = {
     doc: DocumentResponsePermission
@@ -15,18 +15,47 @@ export function TextEditor({
     user,
     initialValue = ""
 }: Props) {
-    const { value, setValue, status } = useAutoSaveDocument(doc.id, initialValue)
-    const isOwner = doc && user && doc.owner_id == user.id;
+    const [value, setValue] = useState(initialValue)
+    const [ws, setWs] = useState<WebSocket | null>(null)
+
+    useEffect(() => {
+        const socket = new WebSocket(`ws://localhost:12001/ws/docs/${doc.id}`)
+        setWs(socket)
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data)
+
+            if (data.type === "edit" && data.content !== value) {
+                setValue(data.content)
+            }
+        }
+
+        return () => {
+            socket.close()
+        }
+    }, [])
+
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const newValue = e.target.value
+        setValue(newValue)
+
+        ws?.send(
+            JSON.stringify({
+            type: "edit",
+            content: newValue,
+            })
+        )
+    }
 
     return (
         <div className="flex-1 flex justify-center bg-white">
-        <div className="w-full max-w-3xl p-8">
+            <div className="w-full max-w-3xl p-8">
 
-          <textarea
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-            placeholder="Start writing..."
-            className="
+                <textarea
+                    value={value}
+                    onChange={handleChange}
+                    placeholder="Start writing..."
+                    className="
               w-full
               h-[calc(100vh-140px)]
               resize-none
@@ -35,10 +64,10 @@ export function TextEditor({
               leading-relaxed
               font-serif
             "
-            disabled={doc.permission === "read"}
-          />
+                    disabled={doc.permission === "read"}
+                />
 
+            </div>
         </div>
-      </div>
     )
 }

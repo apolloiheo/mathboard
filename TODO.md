@@ -14,7 +14,12 @@ Backend:
   - [x] CRUD API for /doc
   - [x] ability to share docs
   - [ ] GET /docs
-  - [ ] share edits via websockets
+
+- [ ] liveshare
+  - [ ] share edits via websockets naively (full doc)
+  - [ ] Operation Transform
+  - [ ] turn into blocks of text
+  - [ ] support latex
 
 - [ ] doc
   - [ ] supports regular markdown
