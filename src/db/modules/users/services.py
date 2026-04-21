@@ -5,7 +5,7 @@ from db.core.auth.services import create_authuser
 from db.core.auth.utils.password import hash_password, verify_password
 from db.core.auth.utils.token import verify_access_token
 from db.database import get_db
-from fastapi import Depends, HTTPException, Header
+from fastapi import Depends, HTTPException, Header, WebSocket
 from sqlalchemy.orm import Session
 
 from db.modules.users.crud import create_user__authuser, get_user_by_email, get_user_by_username
@@ -96,3 +96,21 @@ def get_current_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
+async def get_current_user_ws(
+    websocket: WebSocket,
+    db: Session = Depends(get_db),
+) -> int|None:
+    token = websocket.query_params.get("token")
+
+    if not token:
+        return
+        # raise HTTPException(status_code=401, detail="Missing token")
+
+    user_id = verify_access_token(token)  # your logic
+
+    if not user_id:
+        return
+        # raise HTTPException(status_code=401, detail="Invalid token")
+
+    return user_id

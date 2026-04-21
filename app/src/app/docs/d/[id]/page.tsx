@@ -138,7 +138,7 @@ export default function DocPage() {
       </div>
 
       {/* EDITOR AREA */}
-      <TextEditor doc={doc} user={user}/>
+      <TextEditor doc={doc} user={user} initialValue={doc.text}/>
 
     </div>
   )

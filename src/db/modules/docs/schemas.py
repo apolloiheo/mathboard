@@ -9,8 +9,8 @@ from db.modules.users.schemas import UserPublicResponse
 
 
 class DocumentUpdate(BaseModel):
-    text: Optional[str]
-    title: Optional[str]
+    text: Optional[str]=None
+    title: Optional[str]=None
 
 class DocumentResponse(BaseModel):
     id: int

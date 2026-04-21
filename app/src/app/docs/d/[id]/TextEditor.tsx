@@ -19,7 +19,8 @@ export function TextEditor({
     const [ws, setWs] = useState<WebSocket | null>(null)
 
     useEffect(() => {
-        const socket = new WebSocket(`ws://localhost:12001/ws/docs/${doc.id}`)
+        const token = localStorage.getItem("token")
+        const socket = new WebSocket(`ws://localhost:12001/ws/docs/${doc.id}?token=${token}`)
         setWs(socket)
 
         socket.onmessage = (event) => {

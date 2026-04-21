@@ -116,7 +116,7 @@ export function SharePopover({
         </div>}
 
         {/* Shared users list */}
-        {!isOwner && <div className="space-y-2 px-4">
+        <div className="space-y-2 px-4">
           <div
             className="flex items-center justify-between border rounded-md px-2 py-1 gap-2"
           >
@@ -140,7 +140,8 @@ export function SharePopover({
               </Select>
             </div>
           </div>
-        </div>}
+        </div>
+
         <div className="space-y-2 px-4">
           {isOwner && sharedUsers.length === 0 ? (
             <div className="text-xs text-muted-foreground">
@@ -202,9 +203,9 @@ export function SharePopover({
           </Button>
         </div>
 
-        <div className="text-xs text-muted-foreground">
+        {/* <div className="text-xs text-muted-foreground">
           Permissions: Link = Viewer only
-        </div>
+        </div> */}
       </PopoverContent>
     </Popover>
   )

@@ -29,7 +29,7 @@ def update_doc_text__check_permissions(
         return False
     
     # Check edit permissions
-    if doc.owner_id != user_id:
+    if not user_can_write_document(doc_id, user_id, db):
         return False
     
     update_document__title_text(doc, db, **update_data.model_dump())
