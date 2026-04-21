@@ -13,6 +13,10 @@ class UserCreate__AuthUser(BaseModel):
 # ---------- Get ----------
 class UserPublicResponse(BaseModel):
     id: int
+    username: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 class UserPrivateResponse(UserPublicResponse):
     authuser_id: int

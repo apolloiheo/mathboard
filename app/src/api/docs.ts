@@ -27,3 +27,24 @@ export async function createDoc(
 
   return res.json()
 }
+
+export type DocumentResponse = {
+  id: number
+  title: string
+  text: string
+}
+
+export type DocumentResponsePermission = {
+  id: number
+  owner_id: number
+  owner: any
+
+  title: string
+  text: string
+
+  created_at: string
+  updated_at: string
+
+  permission: "read" | "write" | "owner"
+  owner_username: string
+}

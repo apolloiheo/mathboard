@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from db.core.auth.schemas import AuthUserUpdate__Password
 from db.core.auth.services import update_authuser__password
 from db.modules.docs.crud import delete_documentshare, get_docs_by_owner_id, get_documentshares_by_id
-from db.modules.docs.schemas import DocumentShareResponseExpanded, DocumentResponse, DocumentUpdate
-from db.modules.docs.services import create_empty_untitled_doc, try_create_or_update_documentshare, try_get_documentshares, update_doc_text__check_permissions, delete_doc__check_permissions, try_get_documentshare, view_document
+from db.modules.docs.schemas import DocumentResponsePermission, DocumentShareResponseExpanded, DocumentResponse, DocumentUpdate
+from db.modules.docs.services import create_empty_untitled_doc, try_create_or_update_documentshare, try_get_documentshares, update_doc_text__check_permissions, delete_doc__check_permissions, try_get_documentshare, user_can_write_document, view_document
 from db.modules.users.crud import get_user_by_id
 from db.modules.users.models import User
 from db.modules.users.schemas import UserPublicResponse, UserPrivateResponse
@@ -48,14 +48,28 @@ def get_docs(
             "docs": get_docs_by_owner_id(current_user.id, db)
         }
     
-@router.get("/docs/{doc_id}", response_model=DocumentResponse|None)
+@router.get("/docs/{doc_id}", response_model=DocumentResponsePermission|None)
 def get_document(
     doc_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     doc = view_document(doc_id, current_user.id, db)
-    return doc
+    if doc is None:
+        return None
+    
+    if doc.owner_id == current_user.id:
+        permission = "write" # owner
+    elif user_can_write_document(doc_id, current_user.id, db):
+        permission = "write"
+    else:
+        permission = "read"
+    
+    return {
+        **DocumentResponse.model_validate(doc).model_dump(),
+        "permission": permission,
+        "owner_username": doc.owner.authuser.username
+    }
 
 class SuccessResponse(BaseModel):
     success: bool

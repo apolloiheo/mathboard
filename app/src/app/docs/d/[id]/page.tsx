@@ -6,27 +6,26 @@ import { TextEditor } from "./TextEditor"
 import { Button } from "@/components/ui/button"
 import { updateTitle } from "@/hooks/autoSaveDoc"
 import { SharePopover } from "./SharePopover"
-
-type Document = {
-  id: number
-  title: string
-  text: string
-}
+import { DocumentResponsePermission } from "@/api/docs"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function DocPage() {
   const router = useRouter()
   const params = useParams()
   const id = params.id as string
 
-  const [doc, setDoc] = useState<Document | null>(null)
+  const [doc, setDoc] = useState<DocumentResponsePermission | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const { user, loading: authLoading } = useAuth()
+  const isOwner = doc && user && doc.owner_id == user.id;
 
   const [title, setTitle] = useState("Untitled Document")
   useEffect(() => {
     if (!doc) {
       return
     }
+    console.log({doc})
     setTitle(doc.title)
   }, [doc])
 
@@ -115,7 +114,7 @@ export default function DocPage() {
             Export
           </Button>
 
-          <SharePopover docId={id}/>
+          <SharePopover doc={doc} user={user}/>
         </div>
       </div>
 
@@ -136,7 +135,7 @@ export default function DocPage() {
       </div>
 
       {/* EDITOR AREA */}
-      <TextEditor docId={id} />
+      <TextEditor docId={id}/>
 
     </div>
   )

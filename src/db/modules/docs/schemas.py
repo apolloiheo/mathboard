@@ -27,6 +27,10 @@ class DocumentResponse(BaseModel):
     model_config = {
         "from_attributes": True
     }
+    
+class DocumentResponsePermission(DocumentResponse):
+    permission: str
+    owner_username: str
 
 
 
