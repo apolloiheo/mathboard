@@ -12,8 +12,9 @@ import { permission } from "process"
 
 export default function DocPage() {
   const router = useRouter()
-  const params = useParams()
-  const id = params.id as string
+  const params = useParams();
+  const id = params?.id as string;
+
 
   const [doc, setDoc] = useState<DocumentResponsePermission | null>(null)
   const [loading, setLoading] = useState(true)
