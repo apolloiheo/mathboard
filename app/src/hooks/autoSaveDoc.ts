@@ -42,7 +42,7 @@ export function updateTitle(doc_id: string, newTitle: string) {
 }
 
 
-export function useAutoSaveDocument(docId: string, initialValue: string) {
+export function useAutoSaveDocument(docId: string|number, initialValue: string) {
   const [value, setValue] = useState(initialValue)
   const [status, setStatus] = useState<"saved" | "saving">("saved")
 

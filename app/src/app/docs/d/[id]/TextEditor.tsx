@@ -1,18 +1,22 @@
 "use client"
 
+import { DocumentResponsePermission } from "@/api/docs"
 import { useAutoSaveDocument } from "@/hooks/autoSaveDoc"
 import { useEffect, useState } from "react"
 
 type Props = {
-    docId: string
+    doc: DocumentResponsePermission
+    user: any
     initialValue?: string
 }
 
 export function TextEditor({
-    docId,
+    doc,
+    user,
     initialValue = ""
 }: Props) {
-    const { value, setValue, status } = useAutoSaveDocument(docId, initialValue)
+    const { value, setValue, status } = useAutoSaveDocument(doc.id, initialValue)
+    const isOwner = doc && user && doc.owner_id == user.id;
 
     return (
         <div className="flex-1 flex justify-center bg-white">
@@ -31,6 +35,7 @@ export function TextEditor({
               leading-relaxed
               font-serif
             "
+            disabled={doc.permission === "read"}
           />
 
         </div>

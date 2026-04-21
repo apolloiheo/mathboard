@@ -8,6 +8,7 @@ import { updateTitle } from "@/hooks/autoSaveDoc"
 import { SharePopover } from "./SharePopover"
 import { DocumentResponsePermission } from "@/api/docs"
 import { useAuth } from "@/hooks/useAuth"
+import { permission } from "process"
 
 export default function DocPage() {
   const router = useRouter()
@@ -99,6 +100,7 @@ export default function DocPage() {
             value={title}
             onChange={handleTitleChange}
             className="text-sm font-medium outline-none bg-transparent border-b border-transparent focus:border-muted"
+            disabled={doc.permission === "read"}
           />
 
           <div className="text-xs text-muted-foreground">
@@ -135,7 +137,7 @@ export default function DocPage() {
       </div>
 
       {/* EDITOR AREA */}
-      <TextEditor docId={id}/>
+      <TextEditor doc={doc} user={user}/>
 
     </div>
   )
