@@ -5,7 +5,7 @@ from db.modules.docs.models import Document, DocumentShare
 from db.modules.users.models import User
 from db.modules.users.schemas import UserCreate__AuthUser
 from fastapi import Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 
 
@@ -88,6 +88,18 @@ def get_documentshare_by_ids(
         )
         .first()
     )
+
+def get_documentshares_by_id(
+        doc_id: int,
+        db: Session
+):
+    return (
+        db.query(DocumentShare)
+        .filter(
+            DocumentShare.doc_id == doc_id
+        )
+        .all()
+    )
     
 
 def update_documentshare(
@@ -116,3 +128,11 @@ def update_documentshare_with_share(
     db.refresh(share)
     return True
     
+def delete_documentshare(
+        doc_id: int,
+        user_id: int,
+        db: Session
+):
+    docshare = get_documentshare_by_ids(doc_id, user_id, db)
+    db.delete(docshare)
+    db.commit()

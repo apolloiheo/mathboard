@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from db.core.auth.schemas import AuthUserCreate__Password, AuthUserUpdate__Password
 from db.core.auth.services import update_authuser__password
 from db.core.auth.utils.token import create_access_token
-from db.modules.users.crud import get_user_by_id
+from db.modules.users.crud import get_user_by_id, get_user_by_username
 from db.modules.users.schemas import UserPublicResponse, UserPrivateResponse, UserSignin, UserSigninResponse
 from db.modules.users.services import create_user__password, get_current_user, login_user__password
 from db.database import get_db
@@ -30,11 +30,20 @@ class GetUserResponse(BaseModel):
 
 @router.get("/user", response_model=GetUserResponse)
 def get_user(
-        id: int,
+        id: int|None=None,
+        username: str|None=None,
         current_user: UserPrivateResponse = Depends(get_current_user),
         db: Session = Depends(get_db),
 ):
-    user = get_user_by_id(id, db)
+    if id is not None:
+        user = get_user_by_id(id, db)
+    elif username is not None:
+        user = get_user_by_username(username, db)
+    else:
+        return {
+            "success": False
+        }
+    
     if user is None:
         return {
             "success": False

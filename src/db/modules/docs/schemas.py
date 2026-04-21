@@ -24,10 +24,27 @@ class DocumentResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    model_config = {
+        "from_attributes": True
+    }
+
+
+
 class DocumentShareResponse(BaseModel):
     doc_id: int
     user_id: int
-    share_type: str
+    permission: str
     
     created_at: datetime
     updated_at: datetime
+
+    model_config = {
+        "from_attributes": True
+    }
+
+class DocumentShareResponseExpanded(DocumentShareResponse):
+    username: str
+
+    model_config = {
+        "from_attributes": True
+    }

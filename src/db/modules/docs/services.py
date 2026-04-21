@@ -2,8 +2,8 @@
 
 from sqlalchemy.orm import Session
 
-from db.modules.docs.crud import create_document, create_documentshare, get_document_by_id, get_documentshare_by_ids, update_document__title_text, delete_document, update_documentshare_with_share
-from db.modules.docs.schemas import DocumentUpdate, DocumentShareResponse
+from db.modules.docs.crud import create_document, create_documentshare, get_document_by_id, get_documentshare_by_ids, get_documentshares_by_id, update_document__title_text, delete_document, update_documentshare_with_share
+from db.modules.docs.schemas import DocumentUpdate, DocumentShareResponse, DocumentShareResponseExpanded
 from db.modules.docs.models import DocumentShare
 
 def create_empty_untitled_doc(
@@ -117,7 +117,7 @@ def try_create_or_update_documentshare(
     if doc is None:
         return False
     
-    if doc.owner_id != user_id:
+    if doc.owner_id != inviter_id:
         inviter_share = get_documentshare_by_ids(doc_id, inviter_id, db)
         if inviter_share is None:
             return False
@@ -162,6 +162,28 @@ def try_get_documentshare(
     assert share is not None # from user_can_read_document()
 
     return DocumentShareResponse.model_validate(**share.model_dump())
+
+
+def try_get_documentshares(
+        doc_id: int,
+        user_id: int,
+        db: Session
+) -> list[DocumentShareResponseExpanded]:
+    if not user_can_read_document(doc_id, user_id, db):
+        return []
+    
+    shares = get_documentshares_by_id(
+        doc_id=doc_id,
+        db=db
+    )
+
+    return [
+        DocumentShareResponseExpanded(
+            **DocumentShareResponse.model_validate(share).model_dump(),
+            username=share.user.authuser.username
+        )
+        for share in shares
+    ]
 
 
 # ---- Document interaction ----

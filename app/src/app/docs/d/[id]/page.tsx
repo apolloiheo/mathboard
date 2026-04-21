@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { TextEditor } from "./TextEditor"
 import { Button } from "@/components/ui/button"
 import { updateTitle } from "@/hooks/autoSaveDoc"
+import { SharePopover } from "./SharePopover"
 
 type Document = {
   id: number
@@ -114,11 +115,7 @@ export default function DocPage() {
             Export
           </Button>
 
-          <Button
-            className="text-sm"
-          >
-            Share
-          </Button>
+          <SharePopover docId={id}/>
         </div>
       </div>
 

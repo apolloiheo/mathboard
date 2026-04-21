@@ -5,9 +5,9 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from db.core.auth.schemas import AuthUserUpdate__Password
 from db.core.auth.services import update_authuser__password
-from db.modules.docs.crud import get_docs_by_owner_id
-from db.modules.docs.schemas import DocumentResponse, DocumentUpdate
-from db.modules.docs.services import create_empty_untitled_doc, try_create_or_update_documentshare, update_doc_text__check_permissions, delete_doc__check_permissions, try_get_documentshare, view_document
+from db.modules.docs.crud import delete_documentshare, get_docs_by_owner_id, get_documentshares_by_id
+from db.modules.docs.schemas import DocumentShareResponseExpanded, DocumentResponse, DocumentUpdate
+from db.modules.docs.services import create_empty_untitled_doc, try_create_or_update_documentshare, try_get_documentshares, update_doc_text__check_permissions, delete_doc__check_permissions, try_get_documentshare, view_document
 from db.modules.users.crud import get_user_by_id
 from db.modules.users.models import User
 from db.modules.users.schemas import UserPublicResponse, UserPrivateResponse
@@ -48,7 +48,7 @@ def get_docs(
             "docs": get_docs_by_owner_id(current_user.id, db)
         }
     
-@router.get("/docs/{doc_id}", response_model=DocumentResponse)
+@router.get("/docs/{doc_id}", response_model=DocumentResponse|None)
 def get_document(
     doc_id: int,
     db: Session = Depends(get_db),
@@ -62,8 +62,8 @@ class SuccessResponse(BaseModel):
 
 class UpdateDocData(BaseModel):
     doc_id: int
-    text: Optional[str|None]=None
     title: Optional[str|None]=None
+    text: Optional[str|None]=None
 
 @router.post("/update-doc", response_model=SuccessResponse)
 def update_doc_text(
@@ -107,12 +107,16 @@ class DocShareData(BaseModel):
     user_id: int
     share_type: str
 
+    model_config = {
+        "from_attributes": True
+    }
+
 @router.post("/doc-share", response_model=SuccessResponse)
 def share_doc(
     data: DocShareData,
     current_user: UserPrivateResponse = Depends(get_current_user),
     db: Session = Depends(get_db),
-):  
+):
     success = try_create_or_update_documentshare(
         doc_id=data.doc_id,
         user_id=data.user_id,
@@ -124,18 +128,28 @@ def share_doc(
         "success": success
     }
 
-class DocShareGetData(BaseModel):
-    doc_id: int
-
-@router.get("/doc-share", response_model=DocShareData | None)
+@router.get("/doc-shares", response_model=list[DocumentShareResponseExpanded])
 def get_docshare(
-    data: DocShareGetData,
+    doc_id: int,
     current_user: UserPrivateResponse = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    return try_get_documentshare(
-        doc_id=data.doc_id,
+    return try_get_documentshares(
+        doc_id=doc_id,
         user_id=current_user.id,
         db=db
     )
+
+class DocShareDeleteData(BaseModel):
+    doc_id: int
+    user_id: int
+
+@router.delete("/doc-share", response_model=SuccessResponse)
+def delete_docshare(
+    data: DocShareDeleteData,
+    current_user: UserPrivateResponse = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    delete_documentshare(data.doc_id, data.user_id, db)
+
     
