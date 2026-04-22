@@ -41,8 +41,11 @@ async def websocket_endpoint(
                 #     db
                 # )
 
-    except WebSocketDisconnect:
-        manager.disconnect(websocket, doc_id)
+    except (WebSocketDisconnect, RuntimeError):
+        try:
+            manager.disconnect(websocket, doc_id)
+        except:
+            pass
 
     finally:
         pass

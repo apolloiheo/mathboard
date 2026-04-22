@@ -16,7 +16,6 @@ export function TextEditor({
     user,
     initialValue = ""
 }: Props) {
-    const [ready, setReady] = useState(false)
     const [value, setValue] = useState(initialValue)
     const prevValueRef = useRef(initialValue)
 
@@ -105,7 +104,7 @@ export function TextEditor({
         <div className="flex-1 flex flex-col justify-center bg-white
                 h-[calc(100vh-180px)]">
             {state.order.map((id, i) =>
-                <BlockEditor key={i} block={state.blocks[id]} position={i} sendOp={sendOp} />
+                <BlockEditor key={id} block={state.blocks[id]} position={i} sendOp={sendOp} />
             )}
         </div>
     )
@@ -134,7 +133,8 @@ function BlockEditor({
         sendOp({
             type: "update_block",
             position,
-            content: newValue
+            content: newValue,
+            block_type: block.type
         })
     }
 
@@ -144,6 +144,7 @@ function BlockEditor({
             e.preventDefault()
 
             sendOp({
+                id: crypto.randomUUID(),
                 type: "create_block",
                 position: position + 1,
             })

@@ -53,16 +53,15 @@ class BlockCache:
             }
         return self.blocks[block_id]
 
-    def create_block(self, block_position: int, type: str, content: str) -> bool:
+    def create_block(self, block_id: str, block_position: int, type: str, content: str) -> bool:
         if block_position > len(self.doc_index):
             return False
-        block_id = str(uuid.uuid4())
         self.blocks[block_id] = {
             "type": type,
             "content": content
         }
         self.doc_index.insert(block_position, block_id)
-        self.new.update(self.doc_index[block_position])
+        self.new.add(self.doc_index[block_position])
         self.dirty_position.update(self.doc_index[block_position:])
         return True
 
@@ -93,6 +92,7 @@ class BlockCache:
     def apply_op(self, op: dict) -> bool:
         if op["type"] == "create_block":
             return self.create_block(
+                op["id"],
                 op["position"],
                 "paragraph",
                 ""
@@ -100,7 +100,7 @@ class BlockCache:
         if op["type"] == "update_block":
             return self.update_block(
                 op["position"],
-                op["type"],
+                op["block_type"],
                 op["content"]
             )
         if op["type"] == "delete_block":

@@ -2,7 +2,7 @@
 import asyncio
 import time
 
-from fastapi import WebSocket
+from fastapi import WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
 from db.database import SessionLocal
@@ -39,16 +39,21 @@ class ConnectionManager:
         )
 
         # send cached initial state
-        await websocket.send_json({
-            "type": "init",
-            "content": [
-                {
-                    "id": id,
-                    **self.doc_contents[doc_id].load_block(i) # type: ignore
-                }
-                for i, id in enumerate(self.doc_contents[doc_id].doc_index[:self.INITIAL_LOAD_BLOCKS])
-            ]
-        })
+        try:
+            await websocket.send_json({
+                "type": "init",
+                "content": [
+                    {
+                        "id": id,
+                        **self.doc_contents[doc_id].load_block(i) # type: ignore
+                    }
+                    for i, id in enumerate(self.doc_contents[doc_id].doc_index[:self.INITIAL_LOAD_BLOCKS])
+                ]
+            })
+        except WebSocketDisconnect:
+            # remove dead connection
+            self.active_connections[doc_id].remove(websocket)
+            return
 
     def disconnect(self, websocket: WebSocket, doc_id: int):
         self.active_connections[doc_id].remove(websocket)
@@ -56,6 +61,7 @@ class ConnectionManager:
             self.save_tasks[doc_id].cancel()
 
     async def broadcast(self, doc_id: int, message: dict, sender: WebSocket):
+        print(message)
         for conn in self.active_connections.get(doc_id, []):
             if conn != sender:
                 await conn.send_json(message)

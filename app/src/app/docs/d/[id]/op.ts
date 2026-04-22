@@ -5,8 +5,8 @@ export type Op =
   | { type: "delete"; pos: number; length: number }
   | { type: "init"; content: DocumentBlock[]; }
 
-  | { type: "create_block"; position: number; }
-  | { type: "update_block"; position: number; content: string }
+  | { type: "create_block"; position: number; id: string }
+  | { type: "update_block"; position: number; block_type: string; content: string }
   | { type: "delete_block"; position: number }
 
 export const applyOp = (val: string, op: any) => {
@@ -43,7 +43,6 @@ type DocumentState = {
 
 
 export function reducer(state: DocumentState, op: Op): DocumentState {
-  console.log({op})
   const newState = {
     order: [...state.order],
     blocks: { ...state.blocks }
@@ -85,6 +84,7 @@ export function reducer(state: DocumentState, op: Op): DocumentState {
 
       newState.blocks[id] = {
         ...newState.blocks[id],
+        type: op.block_type,
         content: op.content
       }
       return newState
