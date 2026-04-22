@@ -42,10 +42,11 @@ class ConnectionManager:
         await websocket.send_json({
             "type": "init",
             "content": [
-                self.doc_contents[doc_id].load_block(i)
-                for i in range(min(
-                    len(self.doc_contents[doc_id].doc_index) , self.INITIAL_LOAD_BLOCKS
-                ))
+                {
+                    "id": id,
+                    **self.doc_contents[doc_id].load_block(i) # type: ignore
+                }
+                for i, id in enumerate(self.doc_contents[doc_id].doc_index[:self.INITIAL_LOAD_BLOCKS])
             ]
         })
 

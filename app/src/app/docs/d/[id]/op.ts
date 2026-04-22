@@ -1,7 +1,13 @@
+import { DocumentBlock } from "@/api/docs";
+
 export type Op =
   | { type: "insert"; pos: number; text: string }
   | { type: "delete"; pos: number; length: number }
-  | { type: "init"; content: string; }
+  | { type: "init"; content: DocumentBlock[]; }
+
+  | { type: "create_block"; position: number; }
+  | { type: "update_block"; position: number; content: string }
+  | { type: "delete_block"; position: number }
 
 export const applyOp = (val: string, op: any) => {
   if (op.type === "insert") {
@@ -17,14 +23,83 @@ export const applyOp = (val: string, op: any) => {
 
 export type Block =
   | {
-      id: string;
-      type: "paragraph";
-      content: string;
-      version: number;
-    }
+    id: string;
+    type: "paragraph";
+    content: string;
+    version: number;
+  }
   | {
-      id: string;
-      type: "math_block";
-      latex: string;
-      version: number;
-    };
+    id: string;
+    type: "math_block";
+    latex: string;
+    version: number;
+  };
+
+
+type DocumentState = {
+  order: string[]                         // [block_id, block_id, ...]
+  blocks: Record<string, DocumentBlock>   // block_id -> block
+}
+
+
+export function reducer(state: DocumentState, op: Op): DocumentState {
+  console.log({op})
+  const newState = {
+    order: [...state.order],
+    blocks: { ...state.blocks }
+  }
+
+  switch (op.type) {
+    case "init": {
+      const blocksArray = op.content
+
+      const order: string[] = []
+      const blocks: Record<string, DocumentBlock> = {}
+
+      for (const block of blocksArray) {
+        order.push(block.id)
+        blocks[block.id] = block
+      }
+
+      return {
+        order,
+        blocks
+      }
+    }
+
+    case "create_block": {
+      const id = op.id
+
+      newState.order.splice(op.position, 0, id)
+      newState.blocks[id] = {
+        id,
+        type: "paragraph",
+        content: ""
+      }
+      return newState
+    }
+
+    case "update_block": {
+      const id = newState.order[op.position]
+      if (!id) return state
+
+      newState.blocks[id] = {
+        ...newState.blocks[id],
+        content: op.content
+      }
+      return newState
+    }
+
+    case "delete_block": {
+      const id = newState.order[op.position]
+      if (!id) return state
+
+      newState.order.splice(op.position, 1)
+      delete newState.blocks[id]
+      return newState
+    }
+
+    default:
+      return state
+  }
+}
