@@ -7,7 +7,7 @@ from db.modules.docs.crud import get_document_by_id
 from db.modules.docs.schemas import DocumentUpdate
 from db.modules.docs.services import update_doc_text__check_permissions, user_can_write_document
 from db.modules.liveshare.connection_manager import ConnectionManager
-from db.modules.liveshare.op import apply_op
+from db.modules.liveshare.op import apply_op_old
 from db.modules.users.schemas import UserPrivateResponse
 from db.modules.users.services import get_current_user_ws
 

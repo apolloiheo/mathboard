@@ -1,13 +1,75 @@
 from typing import Literal
+import uuid
 
 from db.core.auth.schemas import AuthUserCreate__Password
-from db.modules.docs.models import Document, DocumentShare
+from db.modules.docs.models import Document, DocumentBlock, DocumentShare
 from db.modules.users.models import User
 from db.modules.users.schemas import UserCreate__AuthUser
 from fastapi import Depends
+from sqlalchemy import text
 from sqlalchemy.orm import Session, joinedload
 
+def create_document_block(
+        id: str,
+        doc_id: int,
+        position: int,
+        type: str,
+        db: Session
+):
+    db.execute(text("""
+        UPDATE document_blocks
+        SET position = position + 1
+        WHERE doc_id = :doc_id AND position > :position
+    """), {"doc_id": doc_id, "position": position}) # type: ignore
 
+    block = DocumentBlock(
+        id=id,
+        doc_id=doc_id,
+        position=position,
+        type=type
+    )
+    db.add(block)
+    db.commit()
+    db.refresh(block)
+    return block
+
+def delete_document_block(
+        doc_id: int,
+        position: int,
+        db: Session
+):
+    block = get_document_block_by_ids(doc_id, position, db)
+
+    # 1. delete block
+    db.delete(block)
+
+    # 2. shift positions
+    db.execute("""
+        UPDATE document_blocks
+        SET position = position - 1
+        WHERE doc_id = :doc_id AND position > :position
+    """, {"doc_id": doc_id, "position": position}) # type: ignore
+
+    db.commit()
+    return
+
+def get_document_block_by_id(
+        id: int,
+        db: Session
+):
+    return db.query(DocumentBlock).filter(
+        DocumentBlock.id == id
+    ).first()
+
+def get_document_block_by_ids(
+        doc_id: int,
+        position: int,
+        db: Session
+):
+    return db.query(DocumentBlock).filter(
+        DocumentBlock.doc_id == doc_id,
+        DocumentBlock.position == position
+    ).first()
 
 def create_document(
         owner_id: int,
@@ -15,6 +77,14 @@ def create_document(
 ):
     obj = Document(owner_id=owner_id)
     db.add(obj)
+    db.flush()
+    create_document_block(
+        id=str(uuid.uuid4()),
+        doc_id=obj.id,
+        position=0,
+        type="paragraph",
+        db=db
+    )
     db.commit()
     db.refresh(obj)
     return obj

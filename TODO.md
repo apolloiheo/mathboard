@@ -16,8 +16,8 @@ Backend:
   - [ ] GET /docs
 
 - [ ] liveshare
-  - [ ] share edits via websockets naively (full doc)
-  - [ ] Operation Transform
+  - [x] share edits via websockets naively (full doc)
+  - [x] Operation Transform
   - [ ] turn into blocks of text
   - [ ] support latex
 

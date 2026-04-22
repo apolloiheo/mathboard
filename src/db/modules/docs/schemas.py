@@ -12,6 +12,18 @@ class DocumentUpdate(BaseModel):
     text: Optional[str]=None
     title: Optional[str]=None
 
+class DocumentBlockResponse(BaseModel):
+    id: str
+    doc_id: int
+    position: int
+    type: str
+    content: str
+    updated_at: datetime
+
+    model_config = {
+        "from_attributes": True
+    }
+
 class DocumentResponse(BaseModel):
     id: int
 
@@ -19,7 +31,7 @@ class DocumentResponse(BaseModel):
     owner: UserPublicResponse
 
     title: str
-    text: str
+    blocks: list[DocumentBlockResponse]
 
     created_at: datetime
     updated_at: datetime
