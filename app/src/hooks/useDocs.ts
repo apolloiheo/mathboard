@@ -33,7 +33,7 @@ export function useDocuments() {
       }
 
       try {
-        const res = await fetch("http://127.0.0.1:12001/my-docs?own=true", {
+        const res = await fetch(`${API_URL}/my-docs?own=true`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
