@@ -7,9 +7,7 @@ from dotenv import load_dotenv
 # Load .env file
 load_dotenv()
 
-PROD = os.getenv("PROD", True)
-
-DATABASE_URL = os.getenv("DATABASE_URL_PROD" if PROD else "DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL")
 assert DATABASE_URL
 
 engine = create_engine(
