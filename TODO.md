@@ -49,10 +49,7 @@ Frontend:
   - [ ] Basic text editor w/o LaTeX
 
 Hosting:
-- [ ] Host on free public domain
-- [ ] Scalable infra
-  - [ ] ...
-- [ ] 
+- [x] Host on free public domain (Next.js on Vercel, FastAPI + PostgreSQL on Railway)
 
 Safeguards:
 - [ ] Ensure document max-size exists and enforced to prevent abuse
