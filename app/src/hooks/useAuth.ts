@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+
 export type User = {
   id: number
   username: string
@@ -25,7 +27,7 @@ export function useAuth() {
       }
 
       try {
-        const res = await fetch("http://127.0.0.1:12001/me", {
+        const res = await fetch(`${API_URL}/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
