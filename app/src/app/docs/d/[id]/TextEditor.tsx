@@ -3,7 +3,7 @@
 import { DocumentBlock, DocumentResponsePermission } from "@/api/docs"
 import { useAutoSaveDocument } from "@/hooks/autoSaveDoc"
 import { ChangeEventHandler, useEffect, useReducer, useRef, useState } from "react"
-import { applyOp, Op, reducer } from "./op"
+import { applyOp, DocumentBlock2, Op, reducer } from "./op"
 
 type Props = {
     doc: DocumentResponsePermission
@@ -49,58 +49,7 @@ export function TextEditor({
         wsRef.current?.send(JSON.stringify(op))
     }
 
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const newValue = e.target.value
-        const oldValue = prevValueRef.current
-
-        // find first diff
-        let start = 0
-        while (
-            start < oldValue.length &&
-            start < newValue.length &&
-            oldValue[start] === newValue[start]
-        ) {
-            start++
-        }
-
-        // find end diff
-        let oldEnd = oldValue.length - 1
-        let newEnd = newValue.length - 1
-
-        while (
-            oldEnd >= start &&
-            newEnd >= start &&
-            oldValue[oldEnd] === newValue[newEnd]
-        ) {
-            oldEnd--
-            newEnd--
-        }
-
-        let op
-
-        if (newValue.length > oldValue.length) {
-            // INSERT
-            op = {
-                type: "insert",
-                pos: start,
-                text: newValue.slice(start, newEnd + 1),
-            }
-        } else {
-            // DELETE
-            op = {
-                type: "delete",
-                pos: start,
-                length: oldEnd - start + 1,
-            }
-        }
-
-        setValue(newValue)
-        prevValueRef.current = newValue
-
-        ws?.send(JSON.stringify(op))
-    }
-
-    const blockRefs = useRef<(HTMLDivElement | null)[]>([])
+    const blockRefs = useRef<(HTMLTextAreaElement | null)[]>([])
     const [focusIndex, setFocusIndex] = useState<number | null>(null)
     const [focusAtEnd, setFocusAtEnd] = useState(false)
 
@@ -162,7 +111,7 @@ function BlockEditor({
     textareaRef,
     requestFocus,
 }: {
-    block: DocumentBlock
+    block: DocumentBlock2
     position: number
     sendOp: (op: Op) => void
     permission: "owner" | "read" | "write"
