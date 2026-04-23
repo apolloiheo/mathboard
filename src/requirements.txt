@@ -10,3 +10,4 @@ psycopg2-binary
 pydantic[email]
 passlib[bcrypt]
 uvicorn[standard]
+argon2-cffi
