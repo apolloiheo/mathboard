@@ -1,7 +1,6 @@
 # mathboard
 Google Docs for LaTeX
-
-Link: hosted
+LIVE: https://mathboard-nine.vercel.app/
 
 ## Preview
 [images]
