@@ -100,11 +100,55 @@ export function TextEditor({
         ws?.send(JSON.stringify(op))
     }
 
+    const blockRefs = useRef<(HTMLDivElement | null)[]>([])
+    const [focusIndex, setFocusIndex] = useState<number | null>(null)
+    const [focusAtEnd, setFocusAtEnd] = useState(false)
+
+    const requestFocus = (index: number, atEnd = false) => {
+        setFocusIndex(index)
+        setFocusAtEnd(atEnd)
+    }
+
+    const sendOpWithFocus = (op: Op, focus?: { index: number, atEnd?: boolean }) => {
+        if (focus) {
+            setFocusIndex(focus.index)
+            setFocusAtEnd(!!focus.atEnd)
+        }
+
+        sendOp(op)
+    }
+
+    useEffect(() => {
+        if (focusIndex === null) return
+
+        const el = blockRefs.current[focusIndex]
+        if (!el) return
+
+        el.focus()
+
+        if (focusAtEnd) {
+            const length = el.value.length
+            el.setSelectionRange(length, length)
+        } else {
+            el.setSelectionRange(0, 0)
+        }
+
+        setFocusIndex(null)
+    }, [state.order])
+
     return (
-        <div className="flex-1 flex flex-col justify-center bg-white
+        <div className="flex-1 flex flex-col bg-white
                 h-[calc(100vh-180px)]">
             {state.order.map((id, i) =>
-                <BlockEditor key={id} block={state.blocks[id]} position={i} sendOp={sendOp} />
+                <BlockEditor
+                    key={id}
+                    block={state.blocks[id]}
+                    position={i}
+                    sendOp={sendOpWithFocus}
+                    permission={doc.permission}
+                    textareaRef={(el) => (blockRefs.current[i] = el)}
+                    requestFocus={requestFocus}
+                />
             )}
         </div>
     )
@@ -113,11 +157,17 @@ export function TextEditor({
 function BlockEditor({
     block,
     position,
-    sendOp
+    sendOp,
+    permission,
+    textareaRef,
+    requestFocus,
 }: {
     block: DocumentBlock
     position: number
     sendOp: (op: Op) => void
+    permission: "owner" | "read" | "write"
+    textareaRef: (el: HTMLTextAreaElement | null) => void
+    requestFocus: (index: number, atEnd?: boolean) => void
 }) {
     const [value, setValue] = useState(block.content)
 
@@ -148,22 +198,27 @@ function BlockEditor({
                 type: "create_block",
                 position: position + 1,
             })
+
+            requestFocus(position + 1)
         }
 
         // BACKSPACE on empty → delete block
-        if (e.key === "Backspace" && value === "") {
+        if (e.key === "Backspace" && value === "" && position !== 0) {
             e.preventDefault()
 
             sendOp({
                 type: "delete_block",
                 position
             })
+
+            requestFocus(position - 1, true)
         }
     }
 
     return (
         <div key={block.id} className="w-full max-w-3xl p-8">
             <textarea
+                ref={textareaRef}
                 value={value}
                 onChange={handleChange}
                 onKeyDown={handleKeyDown}
@@ -176,7 +231,7 @@ function BlockEditor({
                 leading-relaxed
                 font-serif
                 "
-            // disabled={doc.permission === "read"}
+                disabled={permission === "read"}
             />
 
         </div>
