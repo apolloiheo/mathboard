@@ -26,19 +26,26 @@ export type Block =
     id: string;
     type: "paragraph";
     content: string;
-    version: number;
   }
   | {
     id: string;
     type: "math_block";
     latex: string;
-    version: number;
   };
+
+export type DocumentBlock2 = {
+  id: string;
+  doc_id?: number;
+  position?: number;
+  type: string;
+  content: string;
+  updated_at?: string;
+}
 
 
 type DocumentState = {
   order: string[]                         // [block_id, block_id, ...]
-  blocks: Record<string, DocumentBlock>   // block_id -> block
+  blocks: Record<string, DocumentBlock2>   // block_id -> block
 }
 
 
@@ -53,7 +60,7 @@ export function reducer(state: DocumentState, op: Op): DocumentState {
       const blocksArray = op.content
 
       const order: string[] = []
-      const blocks: Record<string, DocumentBlock> = {}
+      const blocks: Record<string, DocumentBlock2> = {}
 
       for (const block of blocksArray) {
         order.push(block.id)

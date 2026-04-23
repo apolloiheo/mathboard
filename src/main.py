@@ -7,6 +7,8 @@ app = FastAPI()
 origins = [
     "http://localhost:12000",  # Next.js dev server
     "http://127.0.0.1:12000",
+    "https://mathboard-git-hosting-apolloiheos-projects.vercel.app/",
+    "https://mathboard-nine.vercel.app/",
 ]
 
 app.add_middleware(

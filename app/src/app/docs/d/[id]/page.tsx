@@ -10,6 +10,8 @@ import { DocumentResponsePermission } from "@/api/docs"
 import { useAuth } from "@/hooks/useAuth"
 import { permission } from "process"
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+
 export default function DocPage() {
   const router = useRouter()
   const params = useParams();
@@ -46,7 +48,7 @@ export default function DocPage() {
       }
 
       try {
-        const res = await fetch(`http://localhost:12001/docs/${id}`, {
+        const res = await fetch(`${API_URL}/docs/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

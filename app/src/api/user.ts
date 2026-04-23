@@ -1,3 +1,4 @@
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 export type UserPublicResponse = {
     id: number
@@ -15,7 +16,7 @@ export async function getUserByUsername(
 ): Promise<GetUserResponse> {
   const token = localStorage.getItem("token")
 
-  const res = await fetch(`http://localhost:12001/user?username=${username}`, {
+  const res = await fetch(`${API_URL}/user?username=${username}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

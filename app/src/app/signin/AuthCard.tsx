@@ -205,7 +205,7 @@ type Mode = "signin" | "signup"
 
 export const AuthCard = ({
     handleRedirect,
-    paramMode = "signin"
+    paramMode = "signup"
 }: {
     handleRedirect: () => void
     paramMode?: Mode

@@ -1,3 +1,4 @@
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 export type CreateShareDocInput = {
     doc_id: number;
@@ -14,7 +15,7 @@ export async function createOrUpdateShareDoc(
 ): Promise<SuccessResponse> {
   const token = localStorage.getItem("token")
 
-  const res = await fetch("http://localhost:12001/doc-share", {
+  const res = await fetch(`${API_URL}/doc-share`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -43,7 +44,7 @@ export async function getShareDocs(
 ): Promise<ShareDocResponseExpanded[]> {
   const token = localStorage.getItem("token")
 
-  const res = await fetch(`http://localhost:12001/doc-shares?doc_id=${doc_id}`, {
+  const res = await fetch(`${API_URL}/doc-shares?doc_id=${doc_id}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -68,7 +69,7 @@ export async function deleteShareDoc(
 ): Promise<SuccessResponse> {
   const token = localStorage.getItem("token")
 
-  const res = await fetch("http://localhost:12001/doc-share", {
+  const res = await fetch(`${API_URL}/doc-share`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
