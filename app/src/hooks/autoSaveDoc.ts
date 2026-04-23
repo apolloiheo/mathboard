@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react"
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+
 const updateTitleTimers: Record<string, ReturnType<typeof setTimeout>> = {}
 
 export function updateTitle(doc_id: string, newTitle: string) {
@@ -16,7 +18,7 @@ export function updateTitle(doc_id: string, newTitle: string) {
     // set new timer
     updateTitleTimers[doc_id] = setTimeout(async () => {
         try {
-            const res = await fetch(`http://localhost:12001/update-doc`, {
+            const res = await fetch(`${API_URL}/update-doc`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -65,7 +67,7 @@ export function useAutoSaveDocument(docId: string|number, initialValue: string) 
     const token = localStorage.getItem("token")
 
     try {
-      await fetch(`http://localhost:12001/documents/${docId}`, {
+      await fetch(`${API_URL}/documents/${docId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

@@ -1,3 +1,5 @@
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+
 export type CreateDocInput = {
     template?: string
     title?: string
@@ -12,7 +14,7 @@ export async function createDoc(
 ): Promise<CreateDocResponse> {
   const token = localStorage.getItem("token")
 
-  const res = await fetch("http://localhost:12001/docs/new", {
+  const res = await fetch(`${API_URL}/docs/new`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

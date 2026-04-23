@@ -1,3 +1,5 @@
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+
 export type CreateUserInput = {
   username: string
   email: string
@@ -11,7 +13,7 @@ export type CreateUserResponse = {
 }
 
 export async function createUser(data: CreateUserInput): Promise<CreateUserResponse> {
-  const res = await fetch("http://localhost:12001/create-user", {
+  const res = await fetch(`${API_URL}/create-user`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -37,7 +39,7 @@ export type SigninUserResponse = {
 }
 
 export async function signinUser(data: SigninUserInput): Promise<SigninUserResponse> {
-  const res = await fetch("http://localhost:12001/signin", {
+  const res = await fetch(`${API_URL}/signin`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
