@@ -137,8 +137,8 @@ export function TextEditor({
     }, [state.order])
 
     return (
-        <div className="flex-1 flex flex-col bg-white
-                h-[calc(100vh-180px)]">
+        <div className="flex-1 flex flex-col bg-white align-items
+                h-[calc(100vh-180px)] p-16">
             {state.order.map((id, i) =>
                 <BlockEditor
                     key={id}
@@ -216,7 +216,7 @@ function BlockEditor({
     }
 
     return (
-        <div key={block.id} className="w-full max-w-3xl p-8">
+        <div key={block.id} className="w-full max-w-3xl">
             <textarea
                 ref={textareaRef}
                 value={value}
@@ -228,7 +228,7 @@ function BlockEditor({
                 resize-none
                 outline-none
                 text-base
-                leading-relaxed
+                leading-normal
                 font-serif
                 "
                 disabled={permission === "read"}
