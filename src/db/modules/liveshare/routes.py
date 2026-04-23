@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 
 from sqlalchemy.orm import Session
@@ -11,11 +12,16 @@ from db.modules.liveshare.op import apply_op_old
 from db.modules.users.schemas import UserPrivateResponse
 from db.modules.users.services import get_current_user_ws
 
+import os
+
+load_dotenv()
+ws_prefix = "wss" if os.getenv("PROD") else "ws"
+
 manager = ConnectionManager()
 
 router = APIRouter()
 
-@router.websocket("/ws/docs/{doc_id}")
+@router.websocket("/" + ws_prefix + "/docs/{doc_id}")
 async def websocket_endpoint(
     websocket: WebSocket,
     doc_id: int,

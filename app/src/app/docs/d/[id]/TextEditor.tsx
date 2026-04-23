@@ -6,6 +6,7 @@ import { ChangeEventHandler, useEffect, useReducer, useRef, useState } from "rea
 import { applyOp, DocumentBlock2, Op, reducer } from "./op"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL
 
 type Props = {
     doc: DocumentResponsePermission
@@ -23,7 +24,7 @@ export function TextEditor({
 
     useEffect(() => {
         const token = localStorage.getItem("token")
-        const socket = new WebSocket(`ws://${API_URL}/ws/docs/${doc.id}?token=${token}`)
+        const socket = new WebSocket(`${WS_URL}://${API_URL}/ws/docs/${doc.id}?token=${token}`)
         wsRef.current = socket
 
         socket.onmessage = (event) => {
