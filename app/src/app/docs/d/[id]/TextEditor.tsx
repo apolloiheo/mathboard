@@ -24,7 +24,7 @@ export function TextEditor({
 
     useEffect(() => {
         const token = localStorage.getItem("token")
-        const socket = new WebSocket(`${WS_URL}://${API_URL}/ws/docs/${doc.id}?token=${token}`)
+        const socket = new WebSocket(`${WS_URL}/ws/docs/${doc.id}?token=${token}`)
         wsRef.current = socket
 
         socket.onmessage = (event) => {
@@ -180,7 +180,6 @@ function BlockEditor({
                 resize-none
                 outline-none
                 text-base
-                leading-normal
                 font-serif
                 "
                 disabled={permission === "read"}
