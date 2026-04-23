@@ -34,6 +34,15 @@ export type DocumentResponse = {
   text: string
 }
 
+export type DocumentBlock = {
+  id: string
+  doc_id: number
+  position: number
+  type: string
+  content: string
+  updated_at: string
+}
+
 export type DocumentResponsePermission = {
   id: number
   owner_id: number
@@ -41,6 +50,7 @@ export type DocumentResponsePermission = {
 
   title: string
   text: string
+  blocks: DocumentBlock[]
 
   created_at: string
   updated_at: string

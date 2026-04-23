@@ -2,19 +2,20 @@
 import asyncio
 import time
 
-from fastapi import WebSocket
+from fastapi import WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
 from db.database import SessionLocal
 from db.modules.docs.crud import get_document_by_id
-from db.modules.liveshare.op import apply_op
+from db.modules.liveshare.op import BlockCache, apply_op_old
 
 class ConnectionManager:
     MAX_INTERVAL_SAVE = 5
+    INITIAL_LOAD_BLOCKS = 20
 
     def __init__(self):
         self.active_connections: dict[int, list[WebSocket]] = {}
-        self.doc_contents: dict[int, str] = {}
+        self.doc_contents: dict[int, BlockCache] = {}
 
         # save
         self.save_tasks: dict[int, asyncio.Task] = {} # debounce tasks
@@ -28,7 +29,7 @@ class ConnectionManager:
             doc = get_document_by_id(doc_id, db)
             if doc is None:
                 return
-            self.doc_contents[doc_id] = doc.text
+            self.doc_contents[doc_id] = BlockCache(doc_id, db)
 
         # debounce
         if doc_id in self.save_tasks:
@@ -38,10 +39,21 @@ class ConnectionManager:
         )
 
         # send cached initial state
-        await websocket.send_json({
-            "type": "init",
-            "content": self.doc_contents[doc_id]
-        })
+        try:
+            await websocket.send_json({
+                "type": "init",
+                "content": [
+                    {
+                        "id": id,
+                        **self.doc_contents[doc_id].load_block(i) # type: ignore
+                    }
+                    for i, id in enumerate(self.doc_contents[doc_id].doc_index[:self.INITIAL_LOAD_BLOCKS])
+                ]
+            })
+        except WebSocketDisconnect:
+            # remove dead connection
+            self.active_connections[doc_id].remove(websocket)
+            return
 
     def disconnect(self, websocket: WebSocket, doc_id: int):
         self.active_connections[doc_id].remove(websocket)
@@ -49,10 +61,11 @@ class ConnectionManager:
             self.save_tasks[doc_id].cancel()
 
     async def broadcast(self, doc_id: int, message: dict, sender: WebSocket):
+        print(message)
         for conn in self.active_connections.get(doc_id, []):
             if conn != sender:
                 await conn.send_json(message)
-        self.doc_contents[doc_id] = apply_op(self.doc_contents[doc_id], message)
+        self.doc_contents[doc_id].apply_op(message)
 
         # max-interval save
         last = self.last_save_time.get(doc_id, 0)
@@ -67,12 +80,7 @@ class ConnectionManager:
     def force_save(self, doc_id: int):
         db = SessionLocal()
         try:
-            doc = get_document_by_id(doc_id, db)
-            if doc is None:
-                return
-            doc.text = self.doc_contents[doc_id]
-            db.commit()
-            self.last_save_time[doc_id] = time.time()
+            self.doc_contents[doc_id].flush()
         finally:
             db.close()
 

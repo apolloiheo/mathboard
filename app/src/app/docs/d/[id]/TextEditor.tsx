@@ -1,9 +1,9 @@
 "use client"
 
-import { DocumentResponsePermission } from "@/api/docs"
+import { DocumentBlock, DocumentResponsePermission } from "@/api/docs"
 import { useAutoSaveDocument } from "@/hooks/autoSaveDoc"
-import { ChangeEventHandler, useEffect, useRef, useState } from "react"
-import { applyOp } from "./op"
+import { ChangeEventHandler, useEffect, useReducer, useRef, useState } from "react"
+import { applyOp, Op, reducer } from "./op"
 
 type Props = {
     doc: DocumentResponsePermission
@@ -16,30 +16,18 @@ export function TextEditor({
     user,
     initialValue = ""
 }: Props) {
-    const [ready, setReady] = useState(false)
     const [value, setValue] = useState(initialValue)
     const prevValueRef = useRef(initialValue)
-    const [ws, setWs] = useState<WebSocket | null>(null)
 
     useEffect(() => {
         const token = localStorage.getItem("token")
         const socket = new WebSocket(`ws://localhost:12001/ws/docs/${doc.id}?token=${token}`)
-        setWs(socket)
+        wsRef.current = socket
 
         socket.onmessage = (event) => {
-            const data = JSON.parse(event.data)
-            if (data.type === "insert" || data.type == "delete") {
-                setValue((prev) => {
-                    const newVal = applyOp(prev, data)
-                    prevValueRef.current = newVal
-                    return newVal
-                })
-            }
-            if (data.type == "init") {
-                setValue(data.content)
-                prevValueRef.current = data.content
-                setReady(true)
-            }
+            const op: Op = JSON.parse(event.data)
+
+            dispatch(op)
         }
 
         return () => {
@@ -47,6 +35,19 @@ export function TextEditor({
         }
     }, [])
 
+    const [state, dispatch] = useReducer(reducer, {
+        order: [],
+        blocks: {}
+    })
+
+    const wsRef = useRef<WebSocket | null>(null)
+
+    const sendOp = (op: Op) => {
+        // optimistic update
+        dispatch(op)
+
+        wsRef.current?.send(JSON.stringify(op))
+    }
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newValue = e.target.value
@@ -99,27 +100,140 @@ export function TextEditor({
         ws?.send(JSON.stringify(op))
     }
 
+    const blockRefs = useRef<(HTMLDivElement | null)[]>([])
+    const [focusIndex, setFocusIndex] = useState<number | null>(null)
+    const [focusAtEnd, setFocusAtEnd] = useState(false)
+
+    const requestFocus = (index: number, atEnd = false) => {
+        setFocusIndex(index)
+        setFocusAtEnd(atEnd)
+    }
+
+    const sendOpWithFocus = (op: Op, focus?: { index: number, atEnd?: boolean }) => {
+        if (focus) {
+            setFocusIndex(focus.index)
+            setFocusAtEnd(!!focus.atEnd)
+        }
+
+        sendOp(op)
+    }
+
+    useEffect(() => {
+        if (focusIndex === null) return
+
+        const el = blockRefs.current[focusIndex]
+        if (!el) return
+
+        el.focus()
+
+        if (focusAtEnd) {
+            const length = el.value.length
+            el.setSelectionRange(length, length)
+        } else {
+            el.setSelectionRange(0, 0)
+        }
+
+        setFocusIndex(null)
+    }, [state.order])
+
     return (
-        <div className="flex-1 flex justify-center bg-white">
-            <div className="w-full max-w-3xl p-8">
-
-                <textarea
-                    value={value}
-                    onChange={handleChange}
-                    placeholder="Start writing..."
-                    className="
-              w-full
-              h-[calc(100vh-140px)]
-              resize-none
-              outline-none
-              text-base
-              leading-relaxed
-              font-serif
-            "
-                    disabled={doc.permission === "read"}
+        <div className="flex-1 flex flex-col bg-white align-items
+                h-[calc(100vh-180px)] p-16">
+            {state.order.map((id, i) =>
+                <BlockEditor
+                    key={id}
+                    block={state.blocks[id]}
+                    position={i}
+                    sendOp={sendOpWithFocus}
+                    permission={doc.permission}
+                    textareaRef={(el) => (blockRefs.current[i] = el)}
+                    requestFocus={requestFocus}
                 />
+            )}
+        </div>
+    )
+}
 
-            </div>
+function BlockEditor({
+    block,
+    position,
+    sendOp,
+    permission,
+    textareaRef,
+    requestFocus,
+}: {
+    block: DocumentBlock
+    position: number
+    sendOp: (op: Op) => void
+    permission: "owner" | "read" | "write"
+    textareaRef: (el: HTMLTextAreaElement | null) => void
+    requestFocus: (index: number, atEnd?: boolean) => void
+}) {
+    const [value, setValue] = useState(block.content)
+
+    // keep local state in sync with external updates
+    useEffect(() => {
+        setValue(block.content)
+    }, [block.content])
+
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const newValue = e.target.value
+        setValue(newValue)
+
+        sendOp({
+            type: "update_block",
+            position,
+            content: newValue,
+            block_type: block.type
+        })
+    }
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        // ENTER → create new block
+        if (e.key === "Enter") {
+            e.preventDefault()
+
+            sendOp({
+                id: crypto.randomUUID(),
+                type: "create_block",
+                position: position + 1,
+            })
+
+            requestFocus(position + 1)
+        }
+
+        // BACKSPACE on empty → delete block
+        if (e.key === "Backspace" && value === "" && position !== 0) {
+            e.preventDefault()
+
+            sendOp({
+                type: "delete_block",
+                position
+            })
+
+            requestFocus(position - 1, true)
+        }
+    }
+
+    return (
+        <div key={block.id} className="w-full max-w-3xl">
+            <textarea
+                ref={textareaRef}
+                value={value}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Start writing..."
+                className="
+                w-full
+                resize-none
+                outline-none
+                text-base
+                leading-normal
+                font-serif
+                "
+                disabled={permission === "read"}
+            />
+
         </div>
     )
 }

@@ -51,7 +51,7 @@ export function SharePopover({
     fetchShares()
   }, [docId])
 
-  const shareLink = `http://localhost:12001/docs/d/${docId}`
+  const shareLink = `http://localhost:12000/docs/d/${docId}`
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(shareLink)

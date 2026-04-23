@@ -24,6 +24,23 @@ class DocumentShare(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class DocumentBlock(Base):
+    __tablename__ = "document_blocks"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+
+    doc_id: Mapped[int] = mapped_column(ForeignKey("documents.id"))
+    document: Mapped["Document"] = relationship(
+        back_populates="blocks"
+    )
+
+    position: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    type: Mapped[str] = mapped_column(String, nullable=False)
+    content: Mapped[str] = mapped_column(String, nullable=False, default="")
+
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 class Document(Base):
     __tablename__ = "documents"
 
@@ -33,7 +50,13 @@ class Document(Base):
     owner: Mapped["User"] = relationship("User")
 
     title: Mapped[str] = mapped_column(String, nullable=False, default="Untitled")
-    text: Mapped[str] = mapped_column(String, nullable=False, default="")
+
+    blocks: Mapped[list["DocumentBlock"]] = relationship(
+        "DocumentBlock",
+        back_populates="document",
+        order_by="DocumentBlock.position",
+        cascade="all, delete-orphan"
+    )
     
     shares: Mapped[list["DocumentShare"]] = relationship(
         "DocumentShare",
