@@ -190,7 +190,7 @@ function BlockEditor({
                     onClick={() => setIsFocused(true)}
                         className={`
                             absolute inset-0
-                            ${isFocused ? "opacity-0 pointer-events-none" : "opacity-100"}
+                            ${isFocused || position === 0 ? "opacity-0 pointer-events-none" : "opacity-100"}
                             z-0
                         `}
                 >
@@ -212,7 +212,7 @@ function BlockEditor({
                         text-base
                         font-serif
                         bg-transparent
-                        ${isFocused ? "opacity-100" : "opacity-0 pointer-events-none"}
+                        ${isFocused || position === 0 ? "opacity-100" : "opacity-0 pointer-events-none"}
                         z-10
                     `}
                     disabled={permission === "read"}
