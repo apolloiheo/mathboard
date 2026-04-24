@@ -8,7 +8,6 @@ import { updateTitle } from "@/hooks/autoSaveDoc"
 import { SharePopover } from "./SharePopover"
 import { DocumentResponsePermission } from "@/api/docs"
 import { useAuth } from "@/hooks/useAuth"
-import { permission } from "process"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
