@@ -134,6 +134,13 @@ function BlockEditor({
 
     useEffect(() => {
         if (!value) setIsFocused(true);
+
+        // removes extra line browsers leave for textarea at bottom for consistent vertical spacing
+        const el = localRef.current;
+        if (!el) return;
+
+        el.style.height = "0px";
+        el.style.height = el.scrollHeight + "px";
     }, [value])
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -196,10 +203,11 @@ function BlockEditor({
                 <div
                     onClick={() => setIsFocused(true)}
                     className={`
-      col-start-1 row-start-1
-      text-base font-serif whitespace-pre-wrap break-words
-                        ${isFocused || position === 0 ? "opacity-0 pointer-events-none" : "opacity-100"}
+                        col-start-1 row-start-1
+                        text-base font-serif leading-relaxed whitespace-pre-wrap break-words
+                        ${isFocused ? "opacity-0 pointer-events-none" : "opacity-100"}
                         z-0
+                        px-10 py-2
                     `}
                 >
                     <LatexRenderer content={value} />
@@ -212,21 +220,23 @@ function BlockEditor({
                     value={value}
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
-                    placeholder="Start writing..."
+                    placeholder={position == 0 ? "Start writing..." : ""}
                     className={`
-      col-start-1 row-start-1
-                    w-full
-                    resize-none
-                    outline-none
-                    text-base
-                    font-serif
-                    bg-transparent
-                    ${isFocused || position === 0 ? "opacity-100" : "opacity-0 pointer-events-none"}
-                    z-10
-                `}
+                        col-start-1 row-start-1
+                        leading-relaxed
+                        px-10 py-2
+                        w-full
+                        resize-none
+                        outline-none
+                        text-base
+                        font-serif
+                        ${isFocused ? "bg-gray-100" : "bg-transparent"}
+                        ${isFocused ? "opacity-100" : "opacity-0 pointer-events-none"}
+                        z-10
+                    `}
                     disabled={permission === "read"}
                     onBlur={() => {
-                        if (value && isFocused) setIsFocused(false)
+                        if (isFocused) setIsFocused(false)
                     }}
                     onFocus={() => {
                         if (!isFocused) setIsFocused(true)
