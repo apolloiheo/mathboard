@@ -180,49 +180,50 @@ function BlockEditor({
         if (!isFocused) return;
         const el = localRef.current;
         if (!el) return;
+        el.focus();
         const len = el.value.length;
         el.setSelectionRange(len, len);
     }, [isFocused]);
 
     return (
         <div key={block.id} className="w-full max-w-3xl relative">
-                <div
-                    onClick={() => setIsFocused(true)}
-                        className={`
-                            absolute inset-0
-                            ${isFocused || position === 0 ? "opacity-0 pointer-events-none" : "opacity-100"}
-                            z-0
-                        `}
-                >
-                    <LatexRenderer content={value}/>
-                </div>
-            <textarea
-                    ref={(el) => {
-                        localRef.current = el;
-                        textareaRef(el);
-                    }}
-                    value={value}
-                    onChange={handleChange}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Start writing..."
+            <div
+                onClick={() => setIsFocused(true)}
                     className={`
-                        relative w-full
-                        resize-none
-                        outline-none
-                        text-base
-                        font-serif
-                        bg-transparent
-                        ${isFocused || position === 0 ? "opacity-100" : "opacity-0 pointer-events-none"}
-                        z-10
+                        absolute inset-0
+                        ${isFocused || position === 0 ? "opacity-0 pointer-events-none" : "opacity-100"}
+                        z-0
                     `}
-                    disabled={permission === "read"}
-                    onBlur={() => {
-                        if (value && isFocused) setIsFocused(false)
-                    }}
-                    onFocus={() => {
-                        if (!isFocused) setIsFocused(true)
-                    }}
-                />
+            >
+                <LatexRenderer content={value}/>
+            </div>
+            <textarea
+                ref={(el) => {
+                    localRef.current = el;
+                    textareaRef(el);
+                }}
+                value={value}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Start writing..."
+                className={`
+                    relative w-full
+                    resize-none
+                    outline-none
+                    text-base
+                    font-serif
+                    bg-transparent
+                    ${isFocused || position === 0 ? "opacity-100" : "opacity-0 pointer-events-none"}
+                    z-10
+                `}
+                disabled={permission === "read"}
+                onBlur={() => {
+                    if (value && isFocused) setIsFocused(false)
+                }}
+                onFocus={() => {
+                    if (!isFocused) setIsFocused(true)
+                }}
+            />
         </div>
     )
 }
