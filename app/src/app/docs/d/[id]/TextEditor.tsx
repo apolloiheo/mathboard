@@ -191,11 +191,12 @@ function BlockEditor({
     }, [isFocused]);
 
     return (
-        <div key={block.id} className="w-full max-w-3xl relative">
+        <div key={block.id} className="w-full max-w-3xl grid">
             <div
                 onClick={() => setIsFocused(true)}
                     className={`
-                        absolute inset-0
+      col-start-1 row-start-1
+      text-base font-serif whitespace-pre-wrap break-words
                         ${isFocused || position === 0 ? "opacity-0 pointer-events-none" : "opacity-100"}
                         z-0
                     `}
@@ -212,7 +213,8 @@ function BlockEditor({
                 onKeyDown={handleKeyDown}
                 placeholder="Start writing..."
                 className={`
-                    relative w-full
+      col-start-1 row-start-1
+                    w-full
                     resize-none
                     outline-none
                     text-base
