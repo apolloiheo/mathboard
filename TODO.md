@@ -1,3 +1,5 @@
+NO LONGER USED: Was for initial full-stack setup which no longer applies
+
 Backend:
 - [x] auth (db)
   - [x] db schema/model
@@ -9,30 +11,29 @@ Backend:
   - [x] crud endpoints in routes.py
   - [x] /me - token
 
-- [ ] docs
+- [x] docs
   - [x] db schema/model
   - [x] CRUD API for /doc
   - [x] ability to share docs
-  - [ ] GET /docs
+  - [x] GET /docs
 
-- [ ] liveshare
+- [x] liveshare
   - [x] share edits via websockets naively (full doc)
   - [x] Operation Transform
-  - [ ] turn into blocks of text
-  - [ ] support latex
+  - [x] turn into blocks of text
+  - [x] support latex
 
-- [ ] doc
+- [x] doc
   - [ ] supports regular markdown
     - [ ] bold/italicize/underline
     - [ ] headers
     - [ ] ` code blocks
     - [ ] ``` code blocks
 
-- [ ] latex
-  - [ ] simple inline render
-  - [ ] simple multiline render
-  - [ ] caching for doc?
-  - [ ]
+- [x] latex
+  - [x] simple inline render
+  - [x] simple multiline render
+  - [x] caching for doc?
 
 Frontend:
 - [ ] /
@@ -44,9 +45,12 @@ Frontend:
   - [x] signin card
   - [x] uses url params to handle redirects after successful signin
 - [ ] /docs
-  - [ ] placeholder simple list of id
-- [ ] /docs/d/{id}
-  - [ ] Basic text editor w/o LaTeX
+  - [x] placeholder simple list of id
+  - [ ] various templates to encourage diverse user experience
+  - [x] tables to show documents I own/shared with me
+- [x] /docs/d/{id}
+  - [x] Basic text editor w/o LaTeX
+  - [x] Optimisitic UI synchronization w WS
 
 Hosting:
 - [x] Host on free public domain (Next.js on Vercel, FastAPI + PostgreSQL on Railway)
