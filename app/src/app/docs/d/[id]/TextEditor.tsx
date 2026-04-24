@@ -191,28 +191,29 @@ function BlockEditor({
     }, [isFocused]);
 
     return (
-        <div key={block.id} className="w-full max-w-3xl grid">
-            <div
-                onClick={() => setIsFocused(true)}
+        <div className="w-full flex justify-center">
+            <div key={block.id} className="w-full max-w-4xl grid">
+                <div
+                    onClick={() => setIsFocused(true)}
                     className={`
       col-start-1 row-start-1
       text-base font-serif whitespace-pre-wrap break-words
                         ${isFocused || position === 0 ? "opacity-0 pointer-events-none" : "opacity-100"}
                         z-0
                     `}
-            >
-                <LatexRenderer content={value}/>
-            </div>
-            <textarea
-                ref={(el) => {
-                    localRef.current = el;
-                    textareaRef(el);
-                }}
-                value={value}
-                onChange={handleChange}
-                onKeyDown={handleKeyDown}
-                placeholder="Start writing..."
-                className={`
+                >
+                    <LatexRenderer content={value} />
+                </div>
+                <textarea
+                    ref={(el) => {
+                        localRef.current = el;
+                        textareaRef(el);
+                    }}
+                    value={value}
+                    onChange={handleChange}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Start writing..."
+                    className={`
       col-start-1 row-start-1
                     w-full
                     resize-none
@@ -223,14 +224,15 @@ function BlockEditor({
                     ${isFocused || position === 0 ? "opacity-100" : "opacity-0 pointer-events-none"}
                     z-10
                 `}
-                disabled={permission === "read"}
-                onBlur={() => {
-                    if (value && isFocused) setIsFocused(false)
-                }}
-                onFocus={() => {
-                    if (!isFocused) setIsFocused(true)
-                }}
-            />
+                    disabled={permission === "read"}
+                    onBlur={() => {
+                        if (value && isFocused) setIsFocused(false)
+                    }}
+                    onFocus={() => {
+                        if (!isFocused) setIsFocused(true)
+                    }}
+                />
+            </div>
         </div>
     )
 }

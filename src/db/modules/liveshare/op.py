@@ -146,7 +146,7 @@ class BlockCache:
 
             self.db.execute(text("""
                 UPDATE document_blocks
-                SET type = :type, content = :content
+                SET type = :type, content = :content, updated_at = NOW()
                 WHERE id = :id
             """), { # type: ignore
                 "id": block_id,
