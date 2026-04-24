@@ -143,7 +143,7 @@ function BlockEditor({
     }, [block.content])
 
     useEffect(() => {
-        if (!value) setIsFocused(true);
+        // if (!value) setIsFocused(true);
 
         // removes extra line browsers leave for textarea at bottom for consistent vertical spacing
         const el = localRef.current;
@@ -155,26 +155,26 @@ function BlockEditor({
         ensureVisibleWithBuffer();
     }, [value])
 
-const ensureVisibleWithBuffer = () => {
-  const el = localRef.current;
-  const container = containerRef.current;
-  if (!el || !container) return;
+    const ensureVisibleWithBuffer = () => {
+        const el = localRef.current;
+        const container = containerRef.current;
+        if (!el || !container) return;
 
-  const buffer = 120;
+        const buffer = 120;
 
-  // position of textarea bottom INSIDE scroll container
-  const elBottom = el.offsetTop + el.scrollHeight;
+        // position of textarea bottom INSIDE scroll container
+        const elBottom = el.offsetTop + el.scrollHeight;
 
-  // current visible bottom of container
-  const containerBottom =
-    container.scrollTop + container.clientHeight;
+        // current visible bottom of container
+        const containerBottom =
+            container.scrollTop + container.clientHeight;
 
-  const distanceFromBottom = containerBottom - elBottom;
+        const distanceFromBottom = containerBottom - elBottom;
 
-  if (distanceFromBottom < buffer) {
-    container.scrollTop += buffer - distanceFromBottom;
-  }
-};
+        if (distanceFromBottom < buffer) {
+            container.scrollTop += buffer - distanceFromBottom;
+        }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newValue = e.target.value
