@@ -138,13 +138,46 @@ function BlockEditor({
 
 
     // keep local state in sync with external updates
+    const prevValueRef = useRef(value);
     useEffect(() => {
-        setValue(block.content)
-    }, [block.content])
+        const el = localRef.current;
+        if (!el) return;
+
+        const incoming = block.content;
+        const current = value;
+        const prev = prevValueRef.current;
+
+        // if nothing changed, skip
+        if (incoming === current) return;
+
+        // simple merge: append difference
+        if (incoming.startsWith(prev)) {
+            const addition = incoming.slice(prev.length);
+
+            const start = el.selectionStart;
+            const end = el.selectionEnd;
+
+            const newValue =
+                current.slice(0, start) +
+                addition +
+                current.slice(end);
+
+            setValue(newValue);
+
+            // keep cursor where it was w/o interruption
+            requestAnimationFrame(() => {
+                const newCursor = start + addition.length;
+                el.setSelectionRange(newCursor, newCursor);
+            });
+        } else {
+            // fallback (overwrite if complex conflict)
+            setValue(incoming);
+        }
+
+        prevValueRef.current = incoming;
+    }, [block.content]);
 
     useEffect(() => {
-        // if (!value) setIsFocused(true);
-
         // removes extra line browsers leave for textarea at bottom for consistent vertical spacing
         const el = localRef.current;
         if (!el) return;
