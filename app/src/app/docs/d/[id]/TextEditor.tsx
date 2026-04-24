@@ -191,6 +191,7 @@ function BlockEditor({
     }, [isFocused]);
 
     return (
+        <div className="w-full flex justify-center">
         <div key={block.id} className="w-full max-w-3xl grid">
             <div
                 onClick={() => setIsFocused(true)}
@@ -231,6 +232,7 @@ function BlockEditor({
                     if (!isFocused) setIsFocused(true)
                 }}
             />
+        </div>
         </div>
     )
 }
