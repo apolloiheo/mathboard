@@ -182,7 +182,7 @@ function BlockEditor({
         if (!el) return;
         const len = el.value.length;
         el.setSelectionRange(len, len);
-    }, [isFocused, value]);
+    }, [isFocused]);
 
     return (
         <div key={block.id} className="w-full max-w-3xl relative">
@@ -216,10 +216,11 @@ function BlockEditor({
                         z-10
                     `}
                     disabled={permission === "read"}
-                    autoFocus
-                    onBlur={() => setIsFocused(false)}
+                    onBlur={() => {
+                        if (value && isFocused) setIsFocused(false)
+                    }}
                     onFocus={() => {
-                        setIsFocused(true)
+                        if (!isFocused) setIsFocused(true)
                     }}
                 />
         </div>
