@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import text
 
 from db.modules.docs.crud import create_document_block, delete_document_block, get_document_block_by_id, get_document_block_by_ids
@@ -127,14 +129,15 @@ class BlockCache:
             position = self.doc_index.index(block_id)
 
             self.db.execute(text("""
-                INSERT INTO document_blocks (id, doc_id, type, content, position)
-                VALUES (:id, :doc_id, :type, :content, :position)
+                INSERT INTO document_blocks (id, doc_id, type, content, position, updated_at)
+                VALUES (:id, :doc_id, :type, :content, :position, :updated_at)
             """), { # type: ignore
                 "id": block_id,
                 "doc_id": self.doc_id,
                 "type": block["type"],
                 "content": block["content"],
-                "position": position
+                "position": position,
+                "updated_at": datetime.utcnow()
             }) # type: ignore
 
         # 3. UPDATE content
