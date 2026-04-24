@@ -2,8 +2,9 @@
 
 import { DocumentBlock, DocumentResponsePermission } from "@/api/docs"
 import { useAutoSaveDocument } from "@/hooks/autoSaveDoc"
-import { ChangeEventHandler, useEffect, useReducer, useRef, useState } from "react"
+import { ChangeEventHandler, useEffect, useLayoutEffect, useReducer, useRef, useState } from "react"
 import { applyOp, DocumentBlock2, Op, reducer } from "./op"
+import LatexRenderer from "@/components/LatexRenderer"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL
@@ -121,12 +122,19 @@ function BlockEditor({
     textareaRef: (el: HTMLTextAreaElement | null) => void
     requestFocus: (index: number, atEnd?: boolean) => void
 }) {
+    const [isFocused, setIsFocused] = useState(false)
+    const localRef = useRef<HTMLTextAreaElement | null>(null);
     const [value, setValue] = useState(block.content)
+
 
     // keep local state in sync with external updates
     useEffect(() => {
         setValue(block.content)
     }, [block.content])
+
+    useEffect(() => {
+        if (!value) setIsFocused(true);
+    }, [value])
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newValue = e.target.value
@@ -168,24 +176,52 @@ function BlockEditor({
         }
     }
 
-    return (
-        <div key={block.id} className="w-full max-w-3xl">
-            <textarea
-                ref={textareaRef}
-                value={value}
-                onChange={handleChange}
-                onKeyDown={handleKeyDown}
-                placeholder="Start writing..."
-                className="
-                w-full
-                resize-none
-                outline-none
-                text-base
-                font-serif
-                "
-                disabled={permission === "read"}
-            />
+    useLayoutEffect(() => {
+        if (!isFocused) return;
+        const el = localRef.current;
+        if (!el) return;
+        const len = el.value.length;
+        el.setSelectionRange(len, len);
+    }, [isFocused, value]);
 
+    return (
+        <div key={block.id} className="w-full max-w-3xl relative">
+                <div
+                    onClick={() => setIsFocused(true)}
+                        className={`
+                            absolute inset-0
+                            ${isFocused ? "opacity-0 pointer-events-none" : "opacity-100"}
+                            z-0
+                        `}
+                >
+                    <LatexRenderer content={value}/>
+                </div>
+            <textarea
+                    ref={(el) => {
+                        localRef.current = el;
+                        textareaRef(el);
+                    }}
+                    value={value}
+                    onChange={handleChange}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Start writing..."
+                    className={`
+                        relative w-full
+                        resize-none
+                        outline-none
+                        text-base
+                        font-serif
+                        bg-transparent
+                        ${isFocused ? "opacity-100" : "opacity-0 pointer-events-none"}
+                        z-10
+                    `}
+                    disabled={permission === "read"}
+                    autoFocus
+                    onBlur={() => setIsFocused(false)}
+                    onFocus={() => {
+                        setIsFocused(true)
+                    }}
+                />
         </div>
     )
 }

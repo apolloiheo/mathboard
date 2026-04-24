@@ -28,7 +28,16 @@ export default function LatexRenderer({ content }: Props) {
   return (
     <div
       ref={containerRef}
-      className="prose max-w-none"
+      className="
+        w-full
+        text-base
+        font-serif
+        leading-normal
+        py-1
+        min-h-[1.5em]
+        whitespace-pre-wrap
+        break-words
+      "
       dangerouslySetInnerHTML={{ __html: content }}
     />
   );
