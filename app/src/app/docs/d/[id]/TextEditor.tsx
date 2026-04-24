@@ -89,9 +89,15 @@ export function TextEditor({
         setFocusIndex(null)
     }, [state.order])
 
+    const containerRef = useRef<HTMLDivElement | null>(null);
+
     return (
         <div className="flex-1 flex flex-col bg-white align-items
-                h-[calc(100vh-180px)] p-16">
+                h-[calc(100vh-180px)] p-16
+                overflow-y-auto
+        "
+            ref={containerRef}
+        >
             {state.order.map((id, i) =>
                 <BlockEditor
                     key={id}
@@ -101,8 +107,10 @@ export function TextEditor({
                     permission={doc.permission}
                     textareaRef={(el) => (blockRefs.current[i] = el)}
                     requestFocus={requestFocus}
+                    containerRef={containerRef}
                 />
             )}
+            <div className="h-[240px] shrink-0" />
         </div>
     )
 }
@@ -114,6 +122,7 @@ function BlockEditor({
     permission,
     textareaRef,
     requestFocus,
+    containerRef,
 }: {
     block: DocumentBlock2
     position: number
@@ -121,6 +130,7 @@ function BlockEditor({
     permission: "owner" | "read" | "write"
     textareaRef: (el: HTMLTextAreaElement | null) => void
     requestFocus: (index: number, atEnd?: boolean) => void
+    containerRef: any
 }) {
     const [isFocused, setIsFocused] = useState(false)
     const localRef = useRef<HTMLTextAreaElement | null>(null);
@@ -141,7 +151,30 @@ function BlockEditor({
 
         el.style.height = "0px";
         el.style.height = el.scrollHeight + "px";
+
+        ensureVisibleWithBuffer();
     }, [value])
+
+const ensureVisibleWithBuffer = () => {
+  const el = localRef.current;
+  const container = containerRef.current;
+  if (!el || !container) return;
+
+  const buffer = 120;
+
+  // position of textarea bottom INSIDE scroll container
+  const elBottom = el.offsetTop + el.scrollHeight;
+
+  // current visible bottom of container
+  const containerBottom =
+    container.scrollTop + container.clientHeight;
+
+  const distanceFromBottom = containerBottom - elBottom;
+
+  if (distanceFromBottom < buffer) {
+    container.scrollTop += buffer - distanceFromBottom;
+  }
+};
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newValue = e.target.value
@@ -195,6 +228,7 @@ function BlockEditor({
         el.focus();
         const len = el.value.length;
         el.setSelectionRange(len, len);
+        ensureVisibleWithBuffer();
     }, [isFocused]);
 
     return (
