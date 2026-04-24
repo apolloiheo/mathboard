@@ -2,18 +2,19 @@
 
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/useAuth"
-import { useDocuments } from "@/hooks/useDocs"
+import { useDocuments, useSharedDocuments } from "@/hooks/useDocs"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { TemplateDocsRow } from "./TemplateDocs"
 import ListDocs from "./ListDocs"
+import ListDocsShared from "./ListDocsShared"
 
 export default function DocsPage() {
   const router = useRouter()
 
   const { user, loading: authLoading } = useAuth()
   const { docs, loading: docsLoading } = useDocuments()
-  const { docs: sharedDocs, loading: sharedDocsLoading } = useDocuments()
+  const { docs: sharedDocs, loading: sharedDocsLoading } = useSharedDocuments()
 
   // auth guard
   useEffect(() => {
@@ -69,10 +70,12 @@ export default function DocsPage() {
             SHARED WITH YOU
           </div>
           <div className="space-y-1  max-h-84 overflow-y-auto">
-            <ListDocs docs={sharedDocs} />
+            <ListDocsShared docs={sharedDocs} />
           </div>
         </div>
       </div>
+
+      <div className="mt-16"/>
     </div>
   )
 }
