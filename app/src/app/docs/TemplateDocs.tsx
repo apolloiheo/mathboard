@@ -32,7 +32,7 @@ export function TemplateDocsRow() {
   }
 
   return (
-    <div className="overflow-x-auto px-4">
+    <div className="overflow-x-auto px-4 pb-4">
       <div className="flex gap-4 pr-5 w-max">
         {templateDocs.map((doc, idx) => (
           <div key={idx} className="flex flex-col items-center shrink-0">

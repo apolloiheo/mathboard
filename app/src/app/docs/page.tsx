@@ -6,12 +6,14 @@ import { useDocuments } from "@/hooks/useDocs"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { TemplateDocsRow } from "./TemplateDocs"
+import ListDocs from "./ListDocs"
 
 export default function DocsPage() {
   const router = useRouter()
 
   const { user, loading: authLoading } = useAuth()
   const { docs, loading: docsLoading } = useDocuments()
+  const { docs: sharedDocs, loading: sharedDocsLoading } = useDocuments()
 
   // auth guard
   useEffect(() => {
@@ -33,37 +35,41 @@ export default function DocsPage() {
   if (!user) return null
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="
+          flex-1 flex flex-col bg-white align-items
+          h-[calc(100vh-180px)] p-16 pt-8
+          overflow-y-auto
+        ">
       {/* Top bar */}
-      <div className="border-b px-4 py-2 font-medium">
+      <div className="px-4 py-2 font-medium">
         Mathboard Docs
       </div>
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 flex-col gap-4">
         {/* Left-side */}
-        <div className="w-full border-r p-3 bg-muted/20 flex flex-col gap-3">
-          <div className="text-xs text-muted-foreground mb-2">
+        <div className="w-full border p-3 bg-muted/20 flex flex-col gap-3">
+          <div className="text-xs text-muted-foreground mb-2 px-2">
             START NEW DOCUMENT
           </div>
 
-          <TemplateDocsRow/>
+          <TemplateDocsRow />
 
-          <div className="text-xs text-muted-foreground mb-2">
+        </div>
+        <div className="w-full border p-3 bg-muted/20 flex flex-col gap-3">
+          <div className="text-xs text-muted-foreground mb-2 px-2">
             YOUR DOCUMENTS
           </div>
+          <div className="space-y-1  max-h-84 overflow-y-auto">
+            <ListDocs docs={docs} />
+          </div>
+        </div>
 
-          <div className="space-y-1">
-            {docs.map((doc) => (
-              <div
-                key={doc.id}
-                onClick={() => router.push(`/docs/d/${doc.id}`)}
-                className="p-2 rounded hover:bg-muted cursor-pointer"
-              >
-                <div className="text-sm font-medium truncate">
-                  {doc.title}
-                </div>
-              </div>
-            ))}
+        <div className="w-full border p-3 bg-muted/20 flex flex-col gap-3">
+          <div className="text-xs text-muted-foreground mb-2 px-2">
+            SHARED WITH YOU
+          </div>
+          <div className="space-y-1  max-h-84 overflow-y-auto">
+            <ListDocs docs={sharedDocs} />
           </div>
         </div>
       </div>
