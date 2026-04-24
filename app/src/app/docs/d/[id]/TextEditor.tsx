@@ -108,6 +108,7 @@ export function TextEditor({
                     textareaRef={(el) => (blockRefs.current[i] = el)}
                     requestFocus={requestFocus}
                     containerRef={containerRef}
+                    emptyDoc={state.blocks[state.order[0]].content === ""}
                 />
             )}
             <div className="h-[240px] shrink-0" />
@@ -123,6 +124,7 @@ function BlockEditor({
     textareaRef,
     requestFocus,
     containerRef,
+    emptyDoc,
 }: {
     block: DocumentBlock2
     position: number
@@ -131,10 +133,17 @@ function BlockEditor({
     textareaRef: (el: HTMLTextAreaElement | null) => void
     requestFocus: (index: number, atEnd?: boolean) => void
     containerRef: any
+    emptyDoc: boolean
 }) {
     const [isFocused, setIsFocused] = useState(false)
     const localRef = useRef<HTMLTextAreaElement | null>(null);
     const [value, setValue] = useState(block.content)
+
+    useEffect(() => {
+        if (emptyDoc && position === 0) {
+            setIsFocused(true)
+        }
+    }, [])
 
 
     // keep local state in sync with external updates

@@ -16,8 +16,7 @@ export default function HomePage() {
 
           <nav className="flex items-center gap-6 text-sm text-muted-foreground">
             <a href="#features" className="hover:text-foreground">Features</a>
-            <a href="#docs" className="hover:text-foreground">Docs</a>
-            <a href="#pricing" className="hover:text-foreground">Pricing</a>
+            <a href="/docs" className="hover:text-foreground">Docs</a>
           </nav>
 
           <Button size="sm">Sign in</Button>
@@ -106,9 +105,11 @@ export default function HomePage() {
           No compile step. No friction. Just LaTeX that feels modern.
         </p>
 
-        <Button size="lg" className="mt-8">
-          Launch Mathboard
-        </Button>
+        <Link href="/docs">
+          <Button size="lg" className="mt-8">
+            Launch Mathboard
+          </Button>
+        </Link>
       </section>
 
       {/* FOOTER */}
