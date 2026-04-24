@@ -149,6 +149,11 @@ function BlockEditor({
     }
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
+        // SHIFT+ENTER → allow newline
+        if (e.key === "Enter" && e.shiftKey) {
+            return; // let textarea handle it naturally
+        }
+
         // ENTER → create new block
         if (e.key === "Enter") {
             e.preventDefault()
