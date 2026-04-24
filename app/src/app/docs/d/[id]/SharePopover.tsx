@@ -60,21 +60,29 @@ export function SharePopover({
   }
 
   const handleAddUser = async (username: string, shareType: string) => {
-    if (!usernameInput.trim()) return
-
-    // check if username is already in sharedUsers
-    const exists = sharedUsers.some(user => user.username === username)
-    if (exists) return
+    if (!username.trim()) return
 
     // fetch user - see if it exists
     const userResponse: GetUserResponse = await getUserByUsername(username)
     const user = userResponse?.user
     if (!user) return
 
-    setSharedUsers((prev) => [
-      ...prev,
-      { user_id: user.id, username: usernameInput.trim(), permission: "read" },
-    ])
+    setSharedUsers((prev) => {
+      // check if username is already in sharedUsers
+      const exists = sharedUsers.some(user => user.username === username)
+      if (exists) {
+        return prev.map(u => 
+          u.username === username
+            ? { ...u, permission: shareType as "read" | "write" }
+            : u
+        )
+      }
+
+      return [
+        ...prev,
+        { user_id: user.id, username: username.trim(), permission: "read" },
+      ]
+    })
 
     createOrUpdateShareDoc({ doc_id: docId as unknown as number, user_id: user.id, share_type: shareType })
   }
@@ -91,8 +99,8 @@ export function SharePopover({
           <PopoverDescription>
             {
               doc.permission === "read"
-              ? "See who has access to this document."
-              : "Invite people by username and share via link."
+                ? "See who has access to this document."
+                : "Invite people by username and share via link."
             }
           </PopoverDescription>
         </PopoverHeader>

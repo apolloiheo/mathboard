@@ -2,8 +2,9 @@
 
 import { DocumentBlock, DocumentResponsePermission } from "@/api/docs"
 import { useAutoSaveDocument } from "@/hooks/autoSaveDoc"
-import { ChangeEventHandler, useEffect, useReducer, useRef, useState } from "react"
+import { ChangeEventHandler, useEffect, useLayoutEffect, useReducer, useRef, useState } from "react"
 import { applyOp, DocumentBlock2, Op, reducer } from "./op"
+import LatexRenderer from "@/components/LatexRenderer"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL
@@ -121,12 +122,19 @@ function BlockEditor({
     textareaRef: (el: HTMLTextAreaElement | null) => void
     requestFocus: (index: number, atEnd?: boolean) => void
 }) {
+    const [isFocused, setIsFocused] = useState(false)
+    const localRef = useRef<HTMLTextAreaElement | null>(null);
     const [value, setValue] = useState(block.content)
+
 
     // keep local state in sync with external updates
     useEffect(() => {
         setValue(block.content)
     }, [block.content])
+
+    useEffect(() => {
+        if (!value) setIsFocused(true);
+    }, [value])
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newValue = e.target.value
@@ -141,6 +149,11 @@ function BlockEditor({
     }
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
+        // SHIFT+ENTER → allow newline
+        if (e.key === "Enter" && e.shiftKey) {
+            return; // let textarea handle it naturally
+        }
+
         // ENTER → create new block
         if (e.key === "Enter") {
             e.preventDefault()
@@ -156,6 +169,7 @@ function BlockEditor({
 
         // BACKSPACE on empty → delete block
         if (e.key === "Backspace" && value === "" && position !== 0) {
+            console.log("BACKSPACE", position)
             e.preventDefault()
 
             sendOp({
@@ -167,24 +181,56 @@ function BlockEditor({
         }
     }
 
+    useLayoutEffect(() => {
+        if (!isFocused) return;
+        const el = localRef.current;
+        if (!el) return;
+        el.focus();
+        const len = el.value.length;
+        el.setSelectionRange(len, len);
+    }, [isFocused]);
+
     return (
-        <div key={block.id} className="w-full max-w-3xl">
+        <div key={block.id} className="w-full max-w-3xl grid">
+            <div
+                onClick={() => setIsFocused(true)}
+                    className={`
+      col-start-1 row-start-1
+      text-base font-serif whitespace-pre-wrap break-words
+                        ${isFocused || position === 0 ? "opacity-0 pointer-events-none" : "opacity-100"}
+                        z-0
+                    `}
+            >
+                <LatexRenderer content={value}/>
+            </div>
             <textarea
-                ref={textareaRef}
+                ref={(el) => {
+                    localRef.current = el;
+                    textareaRef(el);
+                }}
                 value={value}
                 onChange={handleChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Start writing..."
-                className="
-                w-full
-                resize-none
-                outline-none
-                text-base
-                font-serif
-                "
+                className={`
+      col-start-1 row-start-1
+                    w-full
+                    resize-none
+                    outline-none
+                    text-base
+                    font-serif
+                    bg-transparent
+                    ${isFocused || position === 0 ? "opacity-100" : "opacity-0 pointer-events-none"}
+                    z-10
+                `}
                 disabled={permission === "read"}
+                onBlur={() => {
+                    if (value && isFocused) setIsFocused(false)
+                }}
+                onFocus={() => {
+                    if (!isFocused) setIsFocused(true)
+                }}
             />
-
         </div>
     )
 }

@@ -23,7 +23,6 @@ export const CreateAccount = ({
 
     async function handleSignUp() {
         setLoading(true)
-        setError(null)
 
         const result = await createAccountHandler({
             username,
@@ -124,7 +123,6 @@ export const Signin = ({
 
     async function handleSignin() {
         setLoading(true)
-        setError(null)
 
         const result = await signinHandler({
             username,
@@ -133,8 +131,10 @@ export const Signin = ({
 
         setLoading(false)
 
+        console.log({result})
+
         if (!result.ok) {
-            setError(result.error)
+            setError(result.error || "Incorrect credentials")
             return
         }
 
