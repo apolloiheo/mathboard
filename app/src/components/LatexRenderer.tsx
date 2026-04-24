@@ -32,8 +32,7 @@ export default function LatexRenderer({ content }: Props) {
         w-full
         text-base
         font-serif
-        leading-normal
-        py-1
+        leading-relaxed
         min-h-[1.5em]
         whitespace-pre-wrap
         break-words

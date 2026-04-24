@@ -170,6 +170,18 @@ def get_documentshares_by_id(
         )
         .all()
     )
+
+def get_documentshares_by_user_id(
+        user_id: int,
+        db: Session
+):
+    return (
+        db.query(DocumentShare)
+        .filter(
+            DocumentShare.user_id == user_id
+        )
+        .all()
+    )
     
 
 def update_documentshare(

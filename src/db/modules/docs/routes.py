@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from db.core.auth.schemas import AuthUserUpdate__Password
 from db.core.auth.services import update_authuser__password
 from db.modules.docs.crud import delete_documentshare, get_docs_by_owner_id, get_documentshares_by_id
-from db.modules.docs.schemas import DocumentResponsePermission, DocumentShareResponseExpanded, DocumentResponse, DocumentUpdate
-from db.modules.docs.services import create_empty_untitled_doc, try_create_or_update_documentshare, try_get_documentshares, update_doc_text__check_permissions, delete_doc__check_permissions, try_get_documentshare, user_can_write_document, view_document
+from db.modules.docs.schemas import DocShareListingResponse, DocumentResponsePermission, DocumentShareResponseExpanded, DocumentResponse, DocumentUpdate
+from db.modules.docs.services import create_empty_untitled_doc, get_viewable_documents, try_create_or_update_documentshare, try_get_documentshares, update_doc_text__check_permissions, delete_doc__check_permissions, try_get_documentshare, user_can_write_document, view_document
 from db.modules.users.crud import get_user_by_id
 from db.modules.users.models import User
 from db.modules.users.schemas import UserPublicResponse, UserPrivateResponse
@@ -47,6 +47,18 @@ def get_docs(
         return {
             "docs": get_docs_by_owner_id(current_user.id, db)
         }
+    
+class DocsSharedResponse(BaseModel):
+    docs: list[DocShareListingResponse]
+    
+@router.get("/shared-docs", response_model=DocsSharedResponse)
+def get_shared_docs(
+    current_user: UserPrivateResponse = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return {
+        "docs": get_viewable_documents(current_user.id, db)
+    }
     
 @router.get("/docs/{doc_id}", response_model=DocumentResponsePermission|None)
 def get_document(

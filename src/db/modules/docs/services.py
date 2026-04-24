@@ -1,10 +1,11 @@
 
-
 from sqlalchemy.orm import Session
 
-from db.modules.docs.crud import create_document, create_documentshare, get_document_by_id, get_documentshare_by_ids, get_documentshares_by_id, update_document__title_text, delete_document, update_documentshare_with_share
-from db.modules.docs.schemas import DocumentUpdate, DocumentShareResponse, DocumentShareResponseExpanded
+from db.core.auth.crud import get_authuser_by_id
+from db.modules.docs.crud import create_document, create_documentshare, get_document_by_id, get_documentshare_by_ids, get_documentshares_by_id, get_documentshares_by_user_id, update_document__title_text, delete_document, update_documentshare_with_share
+from db.modules.docs.schemas import DocShareListingResponse, DocumentResponse, DocumentUpdate, DocumentShareResponse, DocumentShareResponseExpanded
 from db.modules.docs.models import DocumentShare
+from db.modules.users.crud import get_user_by_id
 
 def create_empty_untitled_doc(
         owner_id: int,
@@ -185,6 +186,33 @@ def try_get_documentshares(
         for share in shares
     ]
 
+# ---- DocShare listing ----
+def get_viewable_documents(
+        user_id: int,
+        db: Session
+):
+    shares = get_documentshares_by_user_id(user_id, db)
+    res = []
+    for share in shares:
+        doc = get_document_by_id(share.doc_id, db)
+        if doc is None:
+            continue
+        user = get_user_by_id(doc.owner_id, db)
+        if user is None:
+            username = ""
+        else:
+            username = user.authuser.username
+        res.append(DocShareListingResponse(
+            id=share.doc_id,
+            owner_id=doc.owner_id,
+            owner_username=username,
+            title=doc.title,
+            created_at=doc.created_at,
+            updated_at=doc.updated_at,
+            permission=share.permission
+        ))
+
+    return res
 
 # ---- Document interaction ----
 def view_document(
@@ -196,3 +224,4 @@ def view_document(
         return None
     
     return get_document_by_id(doc_id, db)
+

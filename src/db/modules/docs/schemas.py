@@ -1,7 +1,7 @@
 
 
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
@@ -64,3 +64,14 @@ class DocumentShareResponseExpanded(DocumentShareResponse):
     model_config = {
         "from_attributes": True
     }
+
+
+class DocShareListingResponse(BaseModel):
+    id: int
+    owner_id: int
+    owner_username: str
+    title: str
+    created_at: datetime
+    updated_at: datetime
+    permission: str
+
