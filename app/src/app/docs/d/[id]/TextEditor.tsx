@@ -156,6 +156,7 @@ function BlockEditor({
 
         // BACKSPACE on empty → delete block
         if (e.key === "Backspace" && value === "" && position !== 0) {
+            console.log("BACKSPACE", position)
             e.preventDefault()
 
             sendOp({

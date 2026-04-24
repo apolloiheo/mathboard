@@ -114,8 +114,9 @@ class BlockCache:
     def flush(self):
         # 1. DELETE
         for block_id in self.deleted:
+            print("DELETE", block_id)
             self.db.execute(
-                "DELETE FROM document_blocks WHERE id = :id", # type: ignore
+                text("DELETE FROM document_blocks WHERE id = :id"), # type: ignore
                 {"id": block_id}
             ) # type: ignore
 
