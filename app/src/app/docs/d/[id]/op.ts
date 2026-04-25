@@ -1,12 +1,17 @@
 import { DocumentBlock } from "@/api/docs";
 
+export type CharOp = 
+  | { type: "insert", index: number, text: string }
+  | { type: "delete", index: number, length: number }
+  | { type: "replace", index: number, text: string, length: number }
+
 export type Op =
   | { type: "insert"; pos: number; text: string }
   | { type: "delete"; pos: number; length: number }
   | { type: "init"; content: DocumentBlock[]; }
 
   | { type: "create_block"; position: number; id: string }
-  | { type: "update_block"; position: number; block_type: string; content: string }
+  | { type: "update_block"; position: number; block_type: string; diff: CharOp }
   | { type: "delete_block"; position: number }
 
 export const applyOp = (val: string, op: any) => {
@@ -18,6 +23,19 @@ export const applyOp = (val: string, op: any) => {
     return val.slice(0, op.pos) + val.slice(op.pos + op.length)
   }
 
+  return val
+}
+
+const applyCharOp = (val: string, op: CharOp) => {
+  if (op.type == "insert") {
+    return val.slice(0, op.index) + op.text + val.slice(op.index)
+  }
+  if (op.type == "delete") {
+    return val.slice(0, op.index) + val.slice(op.index + op.length)
+  }
+  if (op.type == "replace") {
+    return val.slice(0, op.index) + op.text + val.slice(op.index + op.length)
+  }
   return val
 }
 
@@ -92,8 +110,9 @@ export function reducer(state: DocumentState, op: Op): DocumentState {
       newState.blocks[id] = {
         ...newState.blocks[id],
         type: op.block_type,
-        content: op.content
+        content: applyCharOp(newState.blocks[id].content, op.diff)
       }
+      console.log({newState})
       return newState
     }
 
