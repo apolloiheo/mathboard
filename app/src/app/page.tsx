@@ -19,7 +19,9 @@ export default function HomePage() {
             <a href="/docs" className="hover:text-foreground">Docs</a>
           </nav>
 
-          <Button size="sm">Sign in</Button>
+          <Link href="/signin">
+            <Button size="sm">Sign in</Button>
+          </Link>
         </div>
       </header>
 

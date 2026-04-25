@@ -62,6 +62,7 @@ class ConnectionManager:
 
     async def broadcast(self, doc_id: int, message: dict, sender: WebSocket):
         print(message)
+        await asyncio.sleep(1)
         for conn in self.active_connections.get(doc_id, []):
             if conn != sender:
                 await conn.send_json(message)

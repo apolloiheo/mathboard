@@ -67,7 +67,7 @@ class BlockCache:
         self.dirty_position.update(self.doc_index[block_position:])
         return True
 
-    def update_block(self, block_position: int, type: str, content: str) -> bool:
+    def update_block(self, block_position: int, type: str, diff: dict) -> bool:
         if block_position > len(self.doc_index):
             return False
         block_id = self.doc_index[block_position]
@@ -76,7 +76,7 @@ class BlockCache:
             return False
         block.update({
             "type": type,
-            "content": content
+            "content": self.apply_charop(block["content"], diff)
         })
         self.dirty_content.add(block_id)
         return True
@@ -103,7 +103,7 @@ class BlockCache:
             return self.update_block(
                 op["position"],
                 op["block_type"],
-                op["content"]
+                op["diff"]
             )
         if op["type"] == "delete_block":
             return self.delete_block(
@@ -111,6 +111,19 @@ class BlockCache:
             )
         
         return False
+    
+    @staticmethod
+    def apply_charop(content: str, op: dict) -> str:
+        if op["type"] == "insert":
+            return content[:op["index"]] + op["text"] + content[op["index"]:]
+
+        if op["type"] == "delete":
+            return content[:op["index"]] + content[op["index"] + op["length"]:]
+
+        if op["type"] == "replace":
+            return content[:op["index"]] + op["text"] + content[op["index"] + op["length"]:]
+
+        return content
     
     # Flush
     def flush(self):
