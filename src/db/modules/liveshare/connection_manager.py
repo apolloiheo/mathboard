@@ -53,6 +53,9 @@ class ConnectionManager:
         except WebSocketDisconnect:
             # remove dead connection
             self.active_connections[doc_id].remove(websocket)
+            if not self.active_connections[doc_id]:
+                del self.active_connections[doc_id]
+                del self.doc_contents[doc_id]
             return
 
     def disconnect(self, websocket: WebSocket, doc_id: int):
