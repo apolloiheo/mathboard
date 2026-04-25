@@ -24,6 +24,8 @@ async def websocket_endpoint(
     db: Session = Depends(get_db),
     current_user_id: int|None = Depends(get_current_user_ws),
 ):
+    if current_user_id is None:
+        return
     await manager.connect(websocket, doc_id, db)
 
     try:
