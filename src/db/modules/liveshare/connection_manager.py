@@ -53,15 +53,13 @@ class ConnectionManager:
         except WebSocketDisconnect:
             # remove dead connection
             self.active_connections[doc_id].remove(websocket)
-            if not self.active_connections[doc_id]:
-                del self.active_connections[doc_id]
-                del self.doc_contents[doc_id]
-            return
 
     def disconnect(self, websocket: WebSocket, doc_id: int):
         self.active_connections[doc_id].remove(websocket)
         if len(self.active_connections[doc_id]) == 0:
             self.save_tasks[doc_id].cancel()
+            del self.active_connections[doc_id]
+            del self.doc_contents[doc_id]
 
     async def broadcast(self, doc_id: int, message: dict, sender: WebSocket):
         print(message)
